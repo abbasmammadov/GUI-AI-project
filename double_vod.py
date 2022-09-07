@@ -1,9 +1,10 @@
-from PyQt6.QtGui import QIcon, QFont
-from PyQt6.QtCore import QDir, Qt, QUrl, QSize
-from PyQt6.QtMultimedia import QMediaPlayer
-from PyQt6.QtMultimediaWidgets import QVideoWidget
-from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
+from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtCore import QDir, Qt, QUrl, QSize
+from PyQt5.QtMultimedia import QMediaPlayer
+from PyQt5.QtMultimediaWidgets import QVideoWidget
+from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
+
 
 import argparse
 from ML_model.detect import run, ROOT
