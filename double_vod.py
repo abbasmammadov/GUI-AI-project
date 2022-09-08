@@ -1,8 +1,8 @@
-from PyQt5.QtGui import QIcon, QFont
-from PyQt5.QtCore import QDir, Qt, QUrl, QSize
-from PyQt5.QtMultimedia import QMediaPlayer
-from PyQt5.QtMultimediaWidgets import QVideoWidget
-from PyQt5.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
+from PyQt6.QtGui import QIcon, QFont
+from PyQt6.QtCore import QDir, Qt, QUrl, QSize
+from PyQt6.QtMultimedia import QMediaPlayer
+from PyQt6.QtMultimediaWidgets import QVideoWidget
+from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
 
 
@@ -34,9 +34,14 @@ class VideoAnalyzerButton(QPushButton):
         self.clicked.connect(self.analyze)
 
     def analyze(self):
+        print (str(ROOT))
+        
         filenm = filename_retrieve()
         wgths = str(ROOT) + '/checkpoints/yolov5s6.pt'
         datayml = str(ROOT) + '/coco128.yaml'
+        print(filenm)
+        print(wgths)
+        print(datayml)
         def parse_opt():
             parser = argparse.ArgumentParser()
             parser.add_argument('--weights', nargs='+', type=str, default=[str(wgths)], help='model path(s)')
