@@ -20,12 +20,19 @@ from utils.general import (LOGGER, check_file, check_img_size, check_imshow, che
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, time_sync
 
-
+# paths of weights on 2 d/t local machines
+abbas_path = {'weights': '/Users/abbasmammadov/Desktop/work/GUI-AI-project/ML_model/checkpoints/yolov5s6.pt',
+                'source': '/Users/abbasmammadov/Desktop/work/GUI-AI-project/ML_model/ny5s_test_pyqt.mp4',
+                'data': '/Users/abbasmammadov/Desktop/work/GUI-AI-project/ML_model/coco128.yaml'}
+local_or_work = '06' # 06 for local, asfaw for work
+kaleb_path = {'weights': f'/Users/kalebmesfin{local_or_work}/Desktop/VS Code Collections/GUI-AI-project/ML_model/checkpoints/yolov5s6.pt',
+                'source': f'/Users/kalebmesfin{local_or_work}/Desktop/VS Code Collections/GUI-AI-project/ML_model/ny5s_test_pyqt.mp4',
+                'data': f'/Users/kalebmesfin{local_or_work}/Desktop/VS Code Collections/GUI-AI-project/ML_model/coco128.yaml'}
 @torch.no_grad()
 def run(
-        weights=['/Users/kalebmesfin06/Desktop/VS Code Collections/GUI-AI-project/ML_model/checkpoints/yolov5s6.pt'],  # model.pt path(s)
-        source='/Users/kalebmesfin06/Desktop/VS Code Collections/GUI-AI-project/ML_model/ny5s_test_pyqt.mp4',  # file/dir/URL/glob, 0 for webcam
-        data='/Users/kalebmesfin06/Desktop/VS Code Collections/GUI-AI-project/ML_model/coco128.yaml',  # dataset.yaml path
+        weights=[kaleb_path['weights']],  # model.pt path(s)
+        source=kaleb_path['source'],  # file/dir/URL/glob, 0 for webcam
+        data=kaleb_path['data'],  # dataset.yaml path
         imgsz=(1280, 1280),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
@@ -191,9 +198,9 @@ def run(
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default=['/Users/abbasmammadov/Desktop/PyQt/Basic-PyQt6-Scripts/main/ML_model/checkpoints/yolov5s6.pt'], help='model path(s)')
-    parser.add_argument('--source', type=str, default='/Users/abbasmammadov/Desktop/PyQt/Basic-PyQt6-Scripts/main/ML_model/ny5s_test_pyqt.mp4', help='file/dir/URL/glob, 0 for webcam')
-    parser.add_argument('--data', type=str, default='/Users/abbasmammadov/Desktop/PyQt/Basic-PyQt6-Scripts/main/ML_model/coco128.yaml', help='(optional) dataset.yaml path')
+    parser.add_argument('--weights', nargs='+', type=str, default=[kaleb_path['weights']], help='model path(s)')
+    parser.add_argument('--source', type=str, default=kaleb_path['source'], help='file/dir/URL/glob, 0 for webcam')
+    parser.add_argument('--data', type=str, default=kaleb_path['data'], help='(optional) dataset.yaml path')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[1280], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')
     parser.add_argument('--iou-thres', type=float, default=0.45, help='NMS IoU threshold')

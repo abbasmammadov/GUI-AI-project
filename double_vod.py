@@ -5,6 +5,7 @@ from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
 
+
 import argparse
 from ML_model.detect import run, ROOT
 #changed by Kaleb
@@ -33,9 +34,14 @@ class VideoAnalyzerButton(QPushButton):
         self.clicked.connect(self.analyze)
 
     def analyze(self):
+        print (str(ROOT))
+        
         filenm = filename_retrieve()
         wgths = str(ROOT) + '/checkpoints/yolov5s6.pt'
         datayml = str(ROOT) + '/coco128.yaml'
+        print(filenm)
+        print(wgths)
+        print(datayml)
         def parse_opt():
             parser = argparse.ArgumentParser()
             parser.add_argument('--weights', nargs='+', type=str, default=[str(wgths)], help='model path(s)')
