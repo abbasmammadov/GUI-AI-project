@@ -114,7 +114,6 @@ def export_onnx(model, im, file, opset, train, dynamic, simplify, prefix=colorst
     try:
         check_requirements(('onnx',))
         import onnx
-
         LOGGER.info(f'\n{prefix} starting export with onnx {onnx.__version__}...')
         f = file.with_suffix('.onnx')
 
@@ -291,7 +290,6 @@ def export_saved_model(model,
     try:
         import tensorflow as tf
         from tensorflow.python.framework.convert_to_constants import convert_variables_to_constants_v2
-
         from models.tf import TFDetect, TFModel
 
         LOGGER.info(f'\n{prefix} starting export with tensorflow {tf.__version__}...')

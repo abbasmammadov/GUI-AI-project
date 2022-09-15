@@ -23,9 +23,9 @@ from utils.torch_utils import select_device, time_sync
 
 @torch.no_grad()
 def run(
-        weights=['/Users/abbasmammadov/Desktop/PyQt/Basic-PyQt6-Scripts/main/ML_model/checkpoints/yolov5s6.pt'],  # model.pt path(s)
-        source='/Users/abbasmammadov/Desktop/PyQt/Basic-PyQt6-Scripts/main/ML_model/ny5s_test_pyqt.mp4',  # file/dir/URL/glob, 0 for webcam
-        data='/Users/abbasmammadov/Desktop/PyQt/Basic-PyQt6-Scripts/main/ML_model/coco128.yaml',  # dataset.yaml path
+        weights=['/Users/kalebmesfin06/Desktop/VS Code Collections/GUI-AI-project/ML_model/checkpoints/yolov5s6.pt'],  # model.pt path(s)
+        source='/Users/kalebmesfin06/Desktop/VS Code Collections/GUI-AI-project/ML_model/ny5s_test_pyqt.mp4',  # file/dir/URL/glob, 0 for webcam
+        data='/Users/kalebmesfin06/Desktop/VS Code Collections/GUI-AI-project/ML_model/coco128.yaml',  # dataset.yaml path
         imgsz=(1280, 1280),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
