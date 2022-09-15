@@ -24,7 +24,7 @@ from utils.torch_utils import select_device, time_sync
 abbas_path = {'weights': '/Users/abbasmammadov/Desktop/work/GUI-AI-project/ML_model/checkpoints/yolov5s6.pt',
                 'source': '/Users/abbasmammadov/Desktop/work/GUI-AI-project/ML_model/ny5s_test_pyqt.mp4',
                 'data': '/Users/abbasmammadov/Desktop/work/GUI-AI-project/ML_model/coco128.yaml'}
-local_or_work = '06' # 06 for local, asfaw for work
+local_or_work = '06' # '06' for local, 'asfaw' for work
 kaleb_path = {'weights': f'/Users/kalebmesfin{local_or_work}/Desktop/VS Code Collections/GUI-AI-project/ML_model/checkpoints/yolov5s6.pt',
                 'source': f'/Users/kalebmesfin{local_or_work}/Desktop/VS Code Collections/GUI-AI-project/ML_model/ny5s_test_pyqt.mp4',
                 'data': f'/Users/kalebmesfin{local_or_work}/Desktop/VS Code Collections/GUI-AI-project/ML_model/coco128.yaml'}
