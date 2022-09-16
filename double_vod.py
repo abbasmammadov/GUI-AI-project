@@ -5,10 +5,11 @@ from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
 
-
+import os
 import argparse
-from ML_model.detect import run, ROOT
+from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 #changed by Kaleb
+# filename = os.path.join(str(ROOT), 'data', 'ny5s_test_pyqt.mp4')
 filename = ''
 def filename_retrieve():
     if filename ==  '':
@@ -19,6 +20,8 @@ saved_dir = ''
 def saved_dir_retrieve():
     if saved_dir ==  '':
         return 'No directory selected'
+    # last_exp = os.path.join('runs', os.listdir('runs'))
+    # saved_dir = os.path.join('runs', os.listdir()[-1])
     return saved_dir
 
 class VideoAnalyzerButton(QPushButton):
@@ -38,13 +41,13 @@ class VideoAnalyzerButton(QPushButton):
         
         filenm = filename_retrieve()
         wgths = str(ROOT) + '/checkpoints/yolov5s6.pt'
-        datayml = str(ROOT) + '/coco128.yaml'
+        datayml = str(ROOT) + '/data/coco128.yaml'
         print(filenm)
         print(wgths)
         print(datayml)
         def parse_opt():
             parser = argparse.ArgumentParser()
-            parser.add_argument('--weights', nargs='+', type=str, default=[str(wgths)], help='model path(s)')
+            parser.add_argument('--weights', nargs='+', type=str, default=str(wgths), help='model path(s)')
             parser.add_argument('--source', type=str, default=str(filenm), help='file/dir/URL/glob, 0 for webcam')
             parser.add_argument('--data', type=str, default=str(datayml), help='(optional) dataset.yaml path')
             parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[1280], help='inference size h,w')
@@ -200,8 +203,9 @@ class VideoPlayer(QWidget):
             filename = fileName
 
     def showresult(self):
-        fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
+        fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4' # 
         print('#######')
+        print(os.getcwd())
         print(fileName)
         print('#######')
         self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
