@@ -1,15 +1,14 @@
 from PyQt6.QtGui import QIcon, QFont
-from PyQt6.QtCore import QDir, Qt, QUrl, QSize
+from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
-from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, 
+from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
 
 import os
 import argparse
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 #changed by Kaleb
-# filename = os.path.join(str(ROOT), 'data', 'ny5s_test_pyqt.mp4')
 filename = ''
 def filename_retrieve():
     if filename ==  '':
@@ -20,23 +19,16 @@ saved_dir = ''
 def saved_dir_retrieve():
     if saved_dir ==  '':
         return 'No directory selected'
-    # last_exp = os.path.join('runs', os.listdir('runs'))
-    # saved_dir = os.path.join('runs', os.listdir()[-1])
     return saved_dir
 
-class VideoAnalyzerButton(QPushButton):
-    def __init__(self, parent=None):
-        super(VideoAnalyzerButton, self).__init__(parent)
-        self.setAccessibleName("analyze_button")
-        self.setToolTip("Apply ML Model")
-        self.setStatusTip("Apply ML Model")
-        self.setFixedHeight(24)
-        self.setIconSize(QSize(16, 16))
-        self.setFont(QFont("Noto Sans", 8))
-        self.setIcon(QIcon("main/analyze.png"))
-        self.clicked.connect(self.analyze)
+# multithreading -> create a worker code
 
-    def analyze(self):
+class Worker(QObject):
+    finished = pyqtSignal()
+    progress = pyqtSignal(int)
+
+    def run_analyze(self):
+        """Long running task - analyzing"""
         print (str(ROOT))
         
         filenm = filename_retrieve()
@@ -81,6 +73,42 @@ class VideoAnalyzerButton(QPushButton):
         save_dir = run(**vars(opt))
         global saved_dir
         saved_dir = save_dir
+class VideoAnalyzerButton(QPushButton, QMainWindow):
+    def __init__(self, parent=None):
+        super(VideoAnalyzerButton, self).__init__(parent)
+        self.setAccessibleName("analyze_button")
+        self.setToolTip("Apply ML Model")
+        self.setStatusTip("Apply ML Model")
+        self.setFixedHeight(24)
+        self.setIconSize(QSize(16, 16))
+        self.setFont(QFont("Noto Sans", 8))
+        self.setIcon(QIcon("analyze.png"))
+        self.clicked.connect(self.analyze)
+
+    def analyze(self):
+        # Step 2: Create a QThread object
+        self.thread = QThread()
+        # Step 3: Create a worker object
+        self.worker = Worker()
+        # Step 4: Move worker to the thread
+        self.worker.moveToThread(self.thread)
+        # Step 5: Connect signals and slots
+        self.thread.started.connect(self.worker.run_analyze)
+        self.worker.finished.connect(self.thread.quit)
+        self.worker.finished.connect(self.worker.deleteLater)
+        self.thread.finished.connect(self.thread.deleteLater)
+        # Step 6: Start the thread
+        self.thread.start()
+
+        # Final resets
+        self.setEnabled(False)
+        self.thread.finished.connect(
+            lambda: self.setEnabled(True)
+        )
+        self.thread.finished.connect(
+            lambda: self.stepLabel.setText("Long-Running Step: 0")
+        )
+   
 
 class VideoPlayer(QWidget):
 
@@ -95,11 +123,13 @@ class VideoPlayer(QWidget):
         # start
         videoWidgetResult = QVideoWidget()
 
-        testbtn = QPushButton("Test")
+        testbtn = QPushButton("Display the status of result as text") # change it to -> show results as text
         testbtn.clicked.connect(self.test)
 
         showresultbtn = QPushButton("Show Result")
         showresultbtn.clicked.connect(self.showresult)
+
+        # to add button vertically create a QPush button instance here
 
         self.playButtonResult = QPushButton()
         self.playButtonResult.setEnabled(False)
@@ -116,13 +146,21 @@ class VideoPlayer(QWidget):
         vodbelow.setContentsMargins(0, 0, 0, 0)
         vodbelow.addWidget(self.playButtonResult)
         vodbelow.addWidget(self.positionSliderResult)
+        
+        # another status bar for showing the file name of the analyzed video
+
+        # self.statusBar2 = QStatusBar()
+        # self.statusBar2.setFont(QFont("Noto Sans", 10))
+        # self.statusBar2.setFixedHeight(14)
 
         layoutResult = QVBoxLayout()
         layoutResult.addWidget(videoWidgetResult)
         layoutResult.addLayout(vodbelow)
+        # layoutUpload.addWidget(self.statusBar2)
         layoutResult.addWidget(showresultbtn)
         layoutResult.addWidget(testbtn)
 
+        # then don't forget to add it here
         # end
 
         openButton = QPushButton("Upload Video")   
@@ -135,7 +173,7 @@ class VideoPlayer(QWidget):
         openButton.clicked.connect(self.open_video)
 
 
-        analyze_button = VideoAnalyzerButton()
+        analyze_button = VideoAnalyzerButton('Apply ML model')
         analyze_button.setWindowTitle("Analyze Video")
 
         self.playButton = QPushButton()
@@ -153,6 +191,7 @@ class VideoPlayer(QWidget):
         self.statusBar = QStatusBar()
         self.statusBar.setFont(QFont("Noto Sans", 10))
         self.statusBar.setFixedHeight(14)
+
 
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
@@ -197,20 +236,19 @@ class VideoPlayer(QWidget):
         if fileName != '':
             self.mediaPlayer.setSource(QUrl.fromLocalFile(fileName))
             self.playButton.setEnabled(True)
-            self.statusBar.showMessage(fileName)
+            self.statusBar.showMessage(fileName.split('/')[-1]) # instead of showing the whole directory, I made it to show only the name of the video
             self.play()
             global filename 
             filename = fileName
 
     def showresult(self):
-        fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4' # 
+        fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
         print('#######')
-        print(os.getcwd())
         print(fileName)
         print('#######')
         self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
-        #self.playButton.setEnabled(True)
-        #self.statusBar.showMessage(fileName)
+        self.playButtonResult.setEnabled(True)
+        self.statusBar.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
         self.playResult()
 
     def name_of_file(self):
