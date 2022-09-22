@@ -86,18 +86,18 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
         self.clicked.connect(self.analyze)
 
     def analyze(self):
-        # Step 2: Create a QThread object
+        # Create a QThread object
         self.thread = QThread()
-        # Step 3: Create a worker object
+        # Create a worker object
         self.worker = Worker()
-        # Step 4: Move worker to the thread
+        # Move worker to the thread
         self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
+        # Connect signals and slots
         self.thread.started.connect(self.worker.run_analyze)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
-        # Step 6: Start the thread
+        # Start the thread
         self.thread.start()
 
         # Final resets
@@ -149,14 +149,14 @@ class VideoPlayer(QWidget):
         
         # another status bar for showing the file name of the analyzed video
 
-        # self.statusBar2 = QStatusBar()
-        # self.statusBar2.setFont(QFont("Noto Sans", 10))
-        # self.statusBar2.setFixedHeight(14)
+        self.statusBar2 = QStatusBar()
+        self.statusBar2.setFont(QFont("Noto Sans", 10))
+        self.statusBar2.setFixedHeight(14)
 
         layoutResult = QVBoxLayout()
         layoutResult.addWidget(videoWidgetResult)
         layoutResult.addLayout(vodbelow)
-        # layoutUpload.addWidget(self.statusBar2)
+        layoutResult.addWidget(self.statusBar2)
         layoutResult.addWidget(showresultbtn)
         layoutResult.addWidget(testbtn)
 
@@ -248,7 +248,7 @@ class VideoPlayer(QWidget):
         print('#######')
         self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
         self.playButtonResult.setEnabled(True)
-        self.statusBar.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
+        self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
         self.playResult()
 
     def name_of_file(self):
