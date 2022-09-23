@@ -89,18 +89,18 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
         self.clicked.connect(self.analyze)
 
     def analyze(self):
-        # Step 2: Create a QThread object
+        # Create a QThread object
         self.thread = QThread()
-        # Step 3: Create a worker object
+        # Create a worker object
         self.worker = Worker()
-        # Step 4: Move worker to the thread
+        # Move worker to the thread
         self.worker.moveToThread(self.thread)
-        # Step 5: Connect signals and slots
+        # Connect signals and slots
         self.thread.started.connect(self.worker.run_analyze)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
-        # Step 6: Start the thread
+        # Start the thread
         self.thread.start()
 
         # Final resets
@@ -209,6 +209,11 @@ class VideoPlayer(QWidget):
         controlLayout.addWidget(self.playButton)
         controlLayout.addWidget(self.positionSlider)
 
+        store_results_button = QPushButton('Download results')
+        store_results_button.setEnabled(True)
+        store_results_button.setFixedHeight(25)
+        store_results_button.setIconSize(btnSize)
+        # store_results_button.setIcon(QIcon('download.png'))
         
         layoutUpload = QVBoxLayout()
         layoutUpload.addWidget(camerabutton)
@@ -216,6 +221,7 @@ class VideoPlayer(QWidget):
         layoutUpload.addLayout(controlLayout)
         layoutUpload.addWidget(self.statusBar)
         layoutUpload.addWidget(analyze_button)
+        layoutUpload.addWidget(store_results_button)
 
 
         layout = QHBoxLayout()
