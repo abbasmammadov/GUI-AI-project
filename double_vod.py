@@ -8,6 +8,7 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMa
 import os
 import argparse
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
+from ML_model.frames import vid_to_frame, getFrame
 #changed by Kaleb
 filename = ''
 def filename_retrieve():
@@ -73,6 +74,8 @@ class Worker(QObject):
         save_dir = run(**vars(opt))
         global saved_dir
         saved_dir = save_dir
+
+
 class VideoAnalyzerButton(QPushButton, QMainWindow):
     def __init__(self, parent=None):
         super(VideoAnalyzerButton, self).__init__(parent)
@@ -142,6 +145,8 @@ class VideoPlayer(QWidget):
         self.positionSliderResult.setRange(0, 0)
         self.positionSliderResult.sliderMoved.connect(self.setPositionResult)
 
+        
+
         vodbelow = QHBoxLayout()
         vodbelow.setContentsMargins(0, 0, 0, 0)
         vodbelow.addWidget(self.playButtonResult)
@@ -160,17 +165,16 @@ class VideoPlayer(QWidget):
         layoutResult.addWidget(showresultbtn)
         layoutResult.addWidget(testbtn)
 
-        # then don't forget to add it here
-        # end
+        # add camera button on the top right corner
 
-        openButton = QPushButton("Upload Video")   
-        openButton.setToolTip("Open Video File")
-        openButton.setStatusTip("Open Video File")
-        openButton.setFixedHeight(24)
-        openButton.setIconSize(btnSize)
-        openButton.setFont(QFont("Noto Sans", 8))
-        openButton.setIcon(QIcon.fromTheme("document-open", QIcon("upload-icon.png")))
-        openButton.clicked.connect(self.open_video)
+        self.openButton = QPushButton("Upload Video")   
+        self.openButton.setToolTip("Open Video File")
+        self.openButton.setStatusTip("Open Video File")
+        self.openButton.setFixedHeight(24)
+        self.openButton.setIconSize(btnSize)
+        self.openButton.setFont(QFont("Noto Sans", 8))
+        self.openButton.setIcon(QIcon.fromTheme("document-open", QIcon("upload-icon.png")))
+        self.openButton.clicked.connect(self.open_video)
 
 
         analyze_button = VideoAnalyzerButton('Apply ML model')
@@ -192,19 +196,32 @@ class VideoPlayer(QWidget):
         self.statusBar.setFont(QFont("Noto Sans", 10))
         self.statusBar.setFixedHeight(14)
 
+        camerabutton = QPushButton('Camera')
+        camerabutton.setEnabled(True)
+        camerabutton.setFixedHeight(30)
+        camerabutton.setIconSize(btnSize)
+        camerabutton.setIcon(QIcon('camera.png'))
+
 
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
-        controlLayout.addWidget(openButton)
+        controlLayout.addWidget(self.openButton)
         controlLayout.addWidget(self.playButton)
         controlLayout.addWidget(self.positionSlider)
 
+        store_results_button = QPushButton('Download results')
+        store_results_button.setEnabled(True)
+        store_results_button.setFixedHeight(25)
+        store_results_button.setIconSize(btnSize)
+        # store_results_button.setIcon(QIcon('download.png'))
         
         layoutUpload = QVBoxLayout()
+        layoutUpload.addWidget(camerabutton)
         layoutUpload.addWidget(videoWidget)
         layoutUpload.addLayout(controlLayout)
         layoutUpload.addWidget(self.statusBar)
         layoutUpload.addWidget(analyze_button)
+        layoutUpload.addWidget(store_results_button)
 
 
         layout = QHBoxLayout()
@@ -240,6 +257,7 @@ class VideoPlayer(QWidget):
             self.play()
             global filename 
             filename = fileName
+            self.openButton.setEnabled(False)
 
     def showresult(self):
         fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
