@@ -30,10 +30,10 @@ class Worker(QObject):
 
     def run_analyze(self):
         """Long running task - analyzing"""
-        print (str(ROOT))
-        
+        print (str(ROOT))        
         filenm = filename_retrieve()
-        wgths = str(ROOT) + '/checkpoints/yolov5s6.pt'
+        sources = 0 if camerabutton.isChecked() else str(filenm)
+        # weights has made global
         datayml = str(ROOT) + '/data/coco128.yaml'
         print(filenm)
         print(wgths)
@@ -126,7 +126,7 @@ class VideoPlayer(QWidget):
         # start
         videoWidgetResult = QVideoWidget()
 
-        testbtn = QPushButton("Display the status of result as text") # change it to -> show results as text
+        testbtn = QPushButton("Display status as text") # change it to -> show results as text
         testbtn.clicked.connect(self.test)
 
         showresultbtn = QPushButton("Show Result")
@@ -176,9 +176,42 @@ class VideoPlayer(QWidget):
         self.openButton.setIcon(QIcon.fromTheme("document-open", QIcon("upload-icon.png")))
         self.openButton.clicked.connect(self.open_video)
 
+        self.select_yolov5 = QPushButton('YOLOv5')
+        self.select_yolov5.setWindowTitle("Analyze Video")
+        self.select_yolov5.setCheckable(True)
+        self.select_yolov5.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
+        self.select_yolov5.clicked.connect(self.select_model)
 
-        analyze_button = VideoAnalyzerButton('Apply ML model')
-        analyze_button.setWindowTitle("Analyze Video")
+        self.select_yolov7 = QPushButton('YOLOv7')
+        self.select_yolov7.setWindowTitle("Analyze Video")
+        self.select_yolov7.setCheckable(True)
+        self.select_yolov7.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
+        self.select_yolov7.clicked.connect(self.select_model)
+        
+        self.select_yoloR = QPushButton('YOLO-R')
+        self.select_yoloR.setWindowTitle("Analyze Video")
+        self.select_yoloR.setCheckable(True)
+        self.select_yoloR.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
+        self.select_yoloR.clicked.connect(self.select_model)
+        
+        self.select_dino = QPushButton('DINO')
+        self.select_dino.setWindowTitle("Analyze Video")
+        self.select_dino.setCheckable(True)
+        self.select_dino.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
+        self.select_dino.clicked.connect(self.select_model)
+
+
+        self.analyze_button = VideoAnalyzerButton('Analyze ML model')
+        self.analyze_button.setWindowTitle('Analyze video')
+        self.analyze_button.setEnabled(False)
+
+        
+        models = QHBoxLayout()
+        models.setContentsMargins(0, 0, 0, 0)
+        models.addWidget(self.select_yolov5)
+        models.addWidget(self.select_yolov7)
+        models.addWidget(self.select_yoloR)
+        models.addWidget(self.select_dino)
 
         self.playButton = QPushButton()
         self.playButton.setEnabled(False)
@@ -197,11 +230,12 @@ class VideoPlayer(QWidget):
         self.statusBar.setFixedHeight(14)
 
         camerabutton = QPushButton('Camera')
+        camerabutton.setCheckable(True)
         camerabutton.setEnabled(True)
         camerabutton.setFixedHeight(30)
         camerabutton.setIconSize(btnSize)
         camerabutton.setIcon(QIcon('camera.png'))
-
+        camerabutton.clicked.connect(self.real_time)
 
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
@@ -220,7 +254,8 @@ class VideoPlayer(QWidget):
         layoutUpload.addWidget(videoWidget)
         layoutUpload.addLayout(controlLayout)
         layoutUpload.addWidget(self.statusBar)
-        layoutUpload.addWidget(analyze_button)
+        layoutUpload.addLayout(models)
+        layoutUpload.addWidget(self.analyze_button)
         layoutUpload.addWidget(store_results_button)
 
 
@@ -244,7 +279,29 @@ class VideoPlayer(QWidget):
         self.mediaPlayerResult.durationChanged.connect(self.durationChangedResult)
         self.mediaPlayerResult.errorOccurred.connect(self.handleError)
 
-    
+    def real_time(self):
+        global source
+        source = 0 # set the source 0
+
+    def select_model(self):
+        """Long running task - analyzing"""        
+        global wgths
+        wgths = str(ROOT) + f'/checkpoints/yolov5s6.pt' # default selection -> yolov5
+        print(self.select_yolov5.isChecked())
+        # if self.select_yolov5.isChecked():
+            # self.select_yolov5.setEnabled(False)
+        if self.select_yolov7.isChecked():
+            wgths = str(ROOT) + f'/checkpoints/yolov7s6.pt'
+            # self.select_yolov7.setEnabled(False)
+        elif self.select_yoloR.isChecked():
+            wgths = str(ROOT) + f'/checkpoints/yolors6.pt'
+            # self.select_yolov7.setEnabled(False)
+        elif self.select_dino.isChecked():
+            wgths = str(ROOT) + f'/checkpoints/dinos6.pt'
+            # self.select_dino.setEnabled(False)
+        print('selected weight:', wgths.split('/')[-1])
+        self.analyze_button.setEnabled(True)
+        return wgths
 
     def open_video(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Upload the desired video",
