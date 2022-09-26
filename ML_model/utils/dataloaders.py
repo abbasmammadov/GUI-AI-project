@@ -33,7 +33,6 @@ from utils.augmentations import (Albumentations, augment_hsv, classify_albumenta
 from utils.general import (DATASETS_DIR, LOGGER, NUM_THREADS, check_dataset, check_requirements, check_yaml, clean_str,
                            cv2, is_colab, is_kaggle, segments2boxes, xyn2xy, xywh2xyxy, xywhn2xyxy, xyxy2xywhn)
 from utils.torch_utils import torch_distributed_zero_first
-
 # Parameters
 HELP_URL = 'See https://github.com/ultralytics/yolov5/wiki/Train-Custom-Data'
 IMG_FORMATS = 'bmp', 'dng', 'jpeg', 'jpg', 'mpo', 'png', 'tif', 'tiff', 'webp', 'pfm'  # include image suffixes
@@ -232,7 +231,11 @@ class LoadImages:
         if self.video_flag[self.count]:
             # Read video
             self.mode = 'video'
+<<<<<<< HEAD
+            # image_paths_list = vid_to_frame('/'.join(path.split('/')[:-1]), path.split('/')[-1])
+=======
             # vid_to_frame('/'.join(path.split('/')[:-1]), path.split('/')[-1])
+>>>>>>> 659fce197fa22a598b25faaed39874b543bd28a3
             ret_val, im0 = self.cap.read()
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.vid_stride * (self.frame + 1))  # read at vid_stride
             while not ret_val:
@@ -247,7 +250,7 @@ class LoadImages:
             self.frame += 1
             # im0 = self._cv2_rotate(im0)  # for use if cv2 autorotation is False
             s = f'video {self.count + 1}/{self.nf} ({self.frame}/{self.frames}) {path}: '
-
+            print(s)
         else:
             # Read image
             self.count += 1
