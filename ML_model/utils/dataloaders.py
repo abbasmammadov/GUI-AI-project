@@ -231,11 +231,6 @@ class LoadImages:
         if self.video_flag[self.count]:
             # Read video
             self.mode = 'video'
-<<<<<<< HEAD
-            # image_paths_list = vid_to_frame('/'.join(path.split('/')[:-1]), path.split('/')[-1])
-=======
-            # vid_to_frame('/'.join(path.split('/')[:-1]), path.split('/')[-1])
->>>>>>> 659fce197fa22a598b25faaed39874b543bd28a3
             ret_val, im0 = self.cap.read()
             self.cap.set(cv2.CAP_PROP_POS_FRAMES, self.vid_stride * (self.frame + 1))  # read at vid_stride
             while not ret_val:

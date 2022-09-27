@@ -3,7 +3,7 @@ from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow,
-        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar)
+        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget)
 
 import os
 import argparse
@@ -32,7 +32,7 @@ class Worker(QObject):
         """Long running task - analyzing"""
         print (str(ROOT))        
         filenm = filename_retrieve()
-        sources = 0 if camerabutton.isChecked() else str(filenm)
+        # sources = 0 if camerabutton.isChecked() else str(filenm)
         # weights has made global
         datayml = str(ROOT) + '/data/coco128.yaml'
         print(filenm)
@@ -117,7 +117,7 @@ class VideoPlayer(QWidget):
 
     def __init__(self, parent=None):
         super(VideoPlayer, self).__init__(parent)
-
+        
         self.mediaPlayer = QMediaPlayer()
         self.mediaPlayerResult = QMediaPlayer()
 
@@ -125,7 +125,8 @@ class VideoPlayer(QWidget):
         videoWidget = QVideoWidget()
         # start
         videoWidgetResult = QVideoWidget()
-
+        videoWidget.setFixedHeight(250)
+        videoWidgetResult.setFixedHeight(250)
         testbtn = QPushButton("Display status as text") # change it to -> show results as text
         testbtn.clicked.connect(self.test)
 
@@ -203,6 +204,7 @@ class VideoPlayer(QWidget):
 
         self.analyze_button = VideoAnalyzerButton('Analyze ML model')
         self.analyze_button.setWindowTitle('Analyze video')
+        self.analyze_button.setCheckable(True)
         self.analyze_button.setEnabled(False)
 
         
@@ -229,13 +231,14 @@ class VideoPlayer(QWidget):
         self.statusBar.setFont(QFont("Noto Sans", 10))
         self.statusBar.setFixedHeight(14)
 
-        camerabutton = QPushButton('Camera')
-        camerabutton.setCheckable(True)
-        camerabutton.setEnabled(True)
-        camerabutton.setFixedHeight(30)
-        camerabutton.setIconSize(btnSize)
-        camerabutton.setIcon(QIcon('camera.png'))
-        camerabutton.clicked.connect(self.real_time)
+        # camerabutton = QPushButton('Camera')
+        # camerabutton.setPosition(0, 0)
+        # camerabutton.setCheckable(True)
+        # camerabutton.setEnabled(True)
+        # camerabutton.setFixedHeight(30)
+        # camerabutton.setIconSize(btnSize)
+        # camerabutton.setIcon(QIcon('camera.png'))
+        # camerabutton.clicked.connect(self.real_time)
 
         controlLayout = QHBoxLayout()
         controlLayout.setContentsMargins(0, 0, 0, 0)
@@ -250,7 +253,7 @@ class VideoPlayer(QWidget):
         # store_results_button.setIcon(QIcon('download.png'))
         
         layoutUpload = QVBoxLayout()
-        layoutUpload.addWidget(camerabutton)
+        # layoutUpload.addWidget(camerabutton)
         layoutUpload.addWidget(videoWidget)
         layoutUpload.addLayout(controlLayout)
         layoutUpload.addWidget(self.statusBar)
@@ -279,9 +282,9 @@ class VideoPlayer(QWidget):
         self.mediaPlayerResult.durationChanged.connect(self.durationChangedResult)
         self.mediaPlayerResult.errorOccurred.connect(self.handleError)
 
-    def real_time(self):
-        global source
-        source = 0 # set the source 0
+    # def real_time(self):
+    #     global source
+    #     source = 0 # set the source 0
 
     def select_model(self):
         """Long running task - analyzing"""        
@@ -384,6 +387,33 @@ class VideoPlayer(QWidget):
     def handleError(self):
         self.playButton.setEnabled(False)
         self.statusBar.showMessage("Error: " + self.mediaPlayer.errorString())
+
+class MyTableWidget(QWidget):
+    
+    def __init__(self, parent):
+        super(QWidget, self).__init__(parent)
+        self.layout = QVBoxLayout(self)
+        
+        # Initialize tab screen
+        self.tabs = QTabWidget()
+        self.tab1 = VideoPlayer()
+        self.tab2 = VideoPlayer()
+        self.tabs.resize(300,200)
+        
+        # Add tabs
+        self.tabs.addTab(self.tab1,"CAM 1")
+        self.tabs.addTab(self.tab2,"CAM 2")
+        
+        # Create first tab
+        self.tab1.layout = QVBoxLayout(self)
+        self.pushButton1 = QPushButton("PyQt5 button")
+        self.tab1.layout.addWidget(self.pushButton1)
+        self.tab1.setLayout(self.tab1.layout)
+        
+        # Add tabs to widget
+        self.layout.addWidget(self.tabs)
+        self.setLayout(self.layout)
+
 
 if __name__ == '__main__':
     import sys
