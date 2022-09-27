@@ -290,6 +290,7 @@ class VideoPlayer(QWidget):
         """Long running task - analyzing"""        
         global wgths
         wgths = str(ROOT) + f'/checkpoints/yolov5s6.pt' # default selection -> yolov5
+        print(ROOT)
         print(self.select_yolov5.isChecked())
         # if self.select_yolov5.isChecked():
             # self.select_yolov5.setEnabled(False)
@@ -393,33 +394,47 @@ class MyTableWidget(QWidget):
     def __init__(self, parent):
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
-        
+        self.tab_number = 1
         # Initialize tab screen
         self.tabs = QTabWidget()
+        self.tabs.setTabPosition(QTabWidget.TabPosition.North)
+        self.add_tab_icon = QPushButton('Add Camera')
+        self.add_tab_icon.setStyleSheet("background-color: blue")
+        self.add_tab_icon.clicked.connect(self.add_tab)
+        self.tabs.setCornerWidget(self.add_tab_icon, Qt.Corner.TopLeftCorner)
         self.tab1 = VideoPlayer()
-        self.tab2 = VideoPlayer()
+        self.tabs.addTab(self.tab1,f"CAM {self.tab_number}")
         self.tabs.resize(300,200)
-        
-        # Add tabs
-        self.tabs.addTab(self.tab1,"CAM 1")
-        self.tabs.addTab(self.tab2,"CAM 2")
-        
-        # Create first tab
-        self.tab1.layout = QVBoxLayout(self)
-        self.pushButton1 = QPushButton("PyQt5 button")
-        self.tab1.layout.addWidget(self.pushButton1)
-        self.tab1.setLayout(self.tab1.layout)
-        
-        # Add tabs to widget
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
+    
+        # how can we allow users to add more tabs
+        
+    def add_tab(self):
+        self.tab_number += 1
+        self.new_tab = VideoPlayer()
+        self.tabs.addTab(self.new_tab, f"CAM {self.tab_number}")
+        
+        
+class App(QMainWindow):
 
+    def __init__(self):
+        super().__init__()
+        self.title = 'PyQt6 - User interface to run object detection models'
+        self.left = 600
+        self.top = 300
+        self.width = 300
+        self.height = 200
+        self.setWindowTitle(self.title)
+        self.setGeometry(self.left, self.top, self.width, self.height)
+        
+        self.table_widget = MyTableWidget(self)
+        self.setCentralWidget(self.table_widget)
+        
+        self.show()
 
 if __name__ == '__main__':
     import sys
     app = QApplication(sys.argv)
-    player = VideoPlayer()
-    player.setWindowTitle("Player")
-    player.resize(600, 400)
-    player.show()
+    ex = App()
     sys.exit(app.exec())
