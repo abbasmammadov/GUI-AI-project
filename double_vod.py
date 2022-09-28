@@ -8,7 +8,7 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMa
 import os
 import argparse
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
-from ML_model.frames import vid_to_frame, getFrame
+# from ML_model.frames import *
 #changed by Kaleb
 filename = ''
 def filename_retrieve():
