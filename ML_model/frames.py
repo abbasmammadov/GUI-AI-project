@@ -36,11 +36,12 @@ def vid_to_frame(video_path, vid_name, sec=0):
         # print(image_path)
     return frames_path, fps
 
-def frame_to_video(frames_path, output_video_name, fps, files):
+def frame_to_video(fps, files):
     ROOT = os.path.abspath(os.getcwd())
     # pathIn= os.path.join(ROOT, 'ML_model', 'data', 'frames')
-    pathIn = frames_path
-    pathOut = os.path.join(frames_path, output_video_name)
+    # pathIn = frames_path
+    frames_path = files[0].split('image')[0] # '/Users/kalebmesfinasfaw/Desktop/VS Code Collections/GUI-AI-project/ML_model/data/frames/'
+    pathOut = os.path.join(frames_path, 'output.mp4')
     frame_array = []
     # files = [f[:-4] for f in os.listdir(pathIn) if os.path.isfile(os.path.join(pathIn, f)) and not f.startswith('.')]
     #for sorting the file names properly
