@@ -231,8 +231,8 @@ class VideoPlayer(QWidget):
         models.addWidget(self.select_dino)
 
         self.playButton = QPushButton()
-        self.playButton.setEnabled(False)
-        # self.playButton.setCheckable(True)
+        self.playButton.setEnabled(True)
+        self.playButton.setCheckable(True)
         self.playButton.setFixedHeight(24)
         self.playButton.setIconSize(btnSize)
         self.playButton.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
@@ -336,12 +336,13 @@ class VideoPlayer(QWidget):
             self.openButton.setEnabled(False)
 
     def showresult(self):
-        # fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
-        fileName = str(saved_dir_retrieve())
+        fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
+        # fileName = str(saved_dir_retrieve())
         print('#######')
         print(fileName)
         print('#######')
         self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
+        self.playButton.setEnabled(True)
         # self.playButtonResult.setEnabled(True)
         # self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
         self.playResult()

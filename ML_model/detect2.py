@@ -173,9 +173,9 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            Image.fromarray(im0[:, :, ::-1]).save(f'{save_dir}/image{count}.jpg') # the type of im0 is numpy.ndarray
-            to_be_appended = os.path.join(save_dir, f'{save_dir}/image{count}.jpg')
-            output_frames.append(to_be_appended) # append output frame
+            # Image.fromarray(im0[:, :, ::-1]).save(f'{save_dir}/image{count}.jpg') # the type of im0 is numpy.ndarray
+            # to_be_appended = os.path.join(save_dir, f'{save_dir}/image{count}.jpg')
+            # output_frames.append(to_be_appended) # append output frame
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
@@ -185,28 +185,27 @@ def run(
                 cv2.waitKey(1)  # 1 millisecond
 
             # Save results (image with detections)
-            # if save_img:
-            #     if dataset.mode == 'image':
-            #         cv2.imwrite(save_path, im0)
-            #     else:  # 'video' or 'stream'
-            #         if vid_path[i] != save_path:  # new video
-            #             vid_path[i] = save_path
-            #             if isinstance(vid_writer[i], cv2.VideoWriter):
-            #                 vid_writer[i].release()  # release previous video writer
-            #             if vid_cap:  # video
-            #                 fps = vid_cap.get(cv2.CAP_PROP_FPS)
-            #                 w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
-            #                 h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            #             else:  # stream
-            #                 fps, w, h = 30, im0.shape[1], im0.shape[0]
-            #             save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
-            #             vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
-            #         vid_writer[i].write(im0)
+            if save_img:
+                if dataset.mode == 'image':
+                    cv2.imwrite(save_path, im0)
+                else:  # 'video' or 'stream'
+                    if vid_path[i] != save_path:  # new video
+                        vid_path[i] = save_path
+                        if isinstance(vid_writer[i], cv2.VideoWriter):
+                            vid_writer[i].release()  # release previous video writer
+                        if vid_cap:  # video
+                            fps = vid_cap.get(cv2.CAP_PROP_FPS)
+                            w = int(vid_cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+                            h = int(vid_cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+                        else:  # stream
+                            fps, w, h = 30, im0.shape[1], im0.shape[0]
+                        save_path = str(Path(save_path).with_suffix('.mp4'))  # force *.mp4 suffix on results videos
+                        vid_writer[i] = cv2.VideoWriter(save_path, cv2.VideoWriter_fourcc(*'mp4v'), fps, (w, h))
+                    vid_writer[i].write(im0)
 
         # Print time (inference-only)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
-    print(save_dir)
-    return save_dir, output_frames
+    # return output_frames
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
     LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
