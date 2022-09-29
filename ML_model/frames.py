@@ -4,8 +4,6 @@ ROOT_DIR = os.path.abspath(os.curdir) # directory = '/Users/kalebmesfin06/Deskto
 # video_path = '/Users/kalebmesfinasfaw/Desktop/VS Code Collections/GUI-AI-project/ML_model/data'
 video_path = os.path.join(ROOT_DIR, 'ML_model', 'data')
 vid_name = 'ny5s_test_pyqt.mp4'
-frame_rate = 5 / 151
-fps = 1 / frame_rate
 print(video_path)
 def getFrame(frames_path, vidcap, sec, count):
     vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
@@ -18,9 +16,11 @@ def getFrame(frames_path, vidcap, sec, count):
         # print(f'image{count} has been saved successfully')
     return hasFrames, image_path
 
-def vid_to_frame(video_path, vid_name, sec=0, frameRate=frame_rate):
+def vid_to_frame(video_path, vid_name, sec=0):
     vidcap = cv2.VideoCapture(video_path + '/' + vid_name)
     #//it will capture image in each 'frameRate' second
+    fps = vidcap.get(cv2.CAP_PROP_FPS) 
+    frameRate = 1 / fps
     count=1
     frames_path = os.path.join(video_path, 'frames')
     if not os.path.exists(frames_path):
@@ -30,13 +30,13 @@ def vid_to_frame(video_path, vid_name, sec=0, frameRate=frame_rate):
     while success:
         count = count + 1
         sec = sec + frameRate
-        sec = round(sec, 2)
+        # sec = round(sec, 2)
         success, image_path = getFrame(frames_path, vidcap, sec, count)
         # image_folder.append(image_path)
         print(image_path)
-    return frames_path
+    return frames_path, fps
 
-def frame_to_video(frames_path, output_video_name, fps=fps):
+def frame_to_video(frames_path, output_video_name, fps):
     ROOT = os.path.abspath(os.getcwd())
     # pathIn= os.path.join(ROOT, 'ML_model', 'data', 'frames')
     pathIn = frames_path
@@ -61,11 +61,11 @@ def frame_to_video(frames_path, output_video_name, fps=fps):
         out.write(frame_array[i])
     out.release()
     return pathOut
-frames_path = vid_to_frame(video_path, vid_name)
+frames_path, fps = vid_to_frame(video_path, vid_name)
 # frames_path = os.path.join(video_path, 'frames')
 print(frames_path)
-
-frame_to_video(frames_path, 'my_video2.mp4')
+print(fps)
+frame_to_video(frames_path, 'my_video2.mp4', fps)
 
 
 

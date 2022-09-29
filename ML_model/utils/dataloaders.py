@@ -245,7 +245,7 @@ class LoadImages:
             self.frame += 1
             # im0 = self._cv2_rotate(im0)  # for use if cv2 autorotation is False
             s = f'video {self.count + 1}/{self.nf} ({self.frame}/{self.frames}) {path}: '
-            print(s)
+            
         else:
             # Read image
             self.count += 1
