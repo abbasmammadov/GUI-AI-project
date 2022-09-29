@@ -1,3 +1,4 @@
+from tabnanny import filename_only
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
@@ -76,12 +77,16 @@ class Worker(QObject):
         global saved_dir
         saved_dir = frame_to_video(save_dir, 'output.mp4', 30, output_frames)
         # saved_dir = save_dir
-        fileName= saved_dir_retrieve()
+        self.mediaPlayerResult = QMediaPlayer()
+        fileName = str(saved_dir_retrieve())
+        print(fileName)
         self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
-        self.playButtonResult.setEnabled(True)
-        self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
-        self.playResult()
-        
+        # self.playButtonResult.setEnabled(True)
+        # self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained  
+        if self.mediaPlayerResult.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+            self.mediaPlayerResult.pause()
+        else:
+            self.mediaPlayerResult.play()
 
 
 class VideoAnalyzerButton(QPushButton, QMainWindow):
@@ -143,12 +148,12 @@ class VideoPlayer(QWidget):
 
         # to add button vertically create a QPush button instance here
 
-        self.playButtonResult = QPushButton()
-        self.playButtonResult.setEnabled(False)
-        self.playButtonResult.setFixedHeight(24)
-        self.playButtonResult.setIconSize(btnSize)
-        self.playButtonResult.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
-        self.playButtonResult.clicked.connect(self.playResult)
+        # self.playButtonResult = QPushButton()
+        # self.playButtonResult.setEnabled(False)
+        # self.playButtonResult.setFixedHeight(24)
+        # self.playButtonResult.setIconSize(btnSize)
+        # self.playButtonResult.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
+        # self.playButtonResult.clicked.connect(self.playResult)
 
         self.positionSliderResult = QSlider(Qt.Orientation.Horizontal)
         self.positionSliderResult.setRange(0, 0)
@@ -328,16 +333,16 @@ class VideoPlayer(QWidget):
             filename = fileName
             self.openButton.setEnabled(False)
 
-    def showresult(self):
-        # fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
-        fileName = str(saved_dir_retrieve())
-        print('#######')
-        print(fileName)
-        print('#######')
-        self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
-        self.playButtonResult.setEnabled(True)
-        self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
-        self.playResult()
+    # def showresult(self):
+    #     # fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
+    #     fileName = str(saved_dir_retrieve())
+    #     print('#######')
+    #     print(fileName)
+    #     print('#######')
+    #     self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
+    #     # self.playButtonResult.setEnabled(True)
+    #     # self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
+    #     self.playResult()
 
     def name_of_file(self):
         print("Name of file")
@@ -350,11 +355,11 @@ class VideoPlayer(QWidget):
         else:
             self.mediaPlayer.play()
 
-    def playResult(self):
-        if self.mediaPlayerResult.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-            self.mediaPlayerResult.pause()
-        else:
-            self.mediaPlayerResult.play()
+    # def playResult(self):
+    #     if self.mediaPlayerResult.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+    #         self.mediaPlayerResult.pause()
+    #     else:
+    #         self.mediaPlayerResult.play()
     
     def mediaStateChanged(self, state):
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
