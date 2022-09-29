@@ -7,7 +7,8 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMa
 
 import os
 import argparse
-from ML_model.detect import run, ROOT # ROOT is ML_model in our case
+from ML_model.detect2 import run, ROOT # ROOT is ML_model in our case
+from ML_model.frames import frame_to_video
 # from ML_model.frames import *
 #changed by Kaleb
 filename = ''
@@ -71,9 +72,16 @@ class Worker(QObject):
             return opt
 
         opt = parse_opt()
-        save_dir = run(**vars(opt))
+        save_dir, output_frames = run(**vars(opt))
         global saved_dir
-        saved_dir = save_dir
+        saved_dir = frame_to_video(save_dir, 'output.mp4', 30, output_frames)
+        # saved_dir = save_dir
+        fileName= saved_dir_retrieve()
+        self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
+        self.playButtonResult.setEnabled(True)
+        self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
+        self.playResult()
+        
 
 
 class VideoAnalyzerButton(QPushButton, QMainWindow):
@@ -321,7 +329,8 @@ class VideoPlayer(QWidget):
             self.openButton.setEnabled(False)
 
     def showresult(self):
-        fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
+        # fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
+        fileName = str(saved_dir_retrieve())
         print('#######')
         print(fileName)
         print('#######')

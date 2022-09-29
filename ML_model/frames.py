@@ -3,8 +3,8 @@ import os
 ROOT_DIR = os.path.abspath(os.curdir) # directory = '/Users/kalebmesfin06/Desktop/VS Code Collections'
 # video_path = '/Users/kalebmesfinasfaw/Desktop/VS Code Collections/GUI-AI-project/ML_model/data'
 video_path = os.path.join(ROOT_DIR, 'ML_model', 'data')
-vid_name = 'ny5s_test_pyqt.mp4'
-print(video_path)
+# vid_name = 'ny5s_test_pyqt.mp4'
+# print(video_path)
 def getFrame(frames_path, vidcap, sec, count):
     vidcap.set(cv2.CAP_PROP_POS_MSEC,sec*1000)
     hasFrames,image = vidcap.read()
@@ -33,21 +33,22 @@ def vid_to_frame(video_path, vid_name, sec=0):
         # sec = round(sec, 2)
         success, image_path = getFrame(frames_path, vidcap, sec, count)
         # image_folder.append(image_path)
-        print(image_path)
+        # print(image_path)
     return frames_path, fps
 
-def frame_to_video(frames_path, output_video_name, fps):
+def frame_to_video(frames_path, output_video_name, fps, files):
     ROOT = os.path.abspath(os.getcwd())
     # pathIn= os.path.join(ROOT, 'ML_model', 'data', 'frames')
     pathIn = frames_path
-    pathOut = os.path.join(ROOT, 'ML_model', 'data', output_video_name)
+    pathOut = os.path.join(frames_path, output_video_name)
     frame_array = []
-    files = [f[:-4] for f in os.listdir(pathIn) if os.path.isfile(os.path.join(pathIn, f)) and not f.startswith('.')]
+    # files = [f[:-4] for f in os.listdir(pathIn) if os.path.isfile(os.path.join(pathIn, f)) and not f.startswith('.')]
     #for sorting the file names properly
-    files.sort(key = lambda x: int(x[5:]))
+    # files.sort(key = lambda x: int(x[5:]))
     for i in range(len(files)):
-        filename=os.path.join(pathIn, f'{files[i]}.jpg')
-        print(filename)
+        # filename=os.path.join(pathIn, f'{files[i]}.jpg')
+        filename=os.path.join(files[i])
+        # print(filename)
         #reading each files
         img = cv2.imread(filename)
         height, width, layers = img.shape
@@ -61,11 +62,11 @@ def frame_to_video(frames_path, output_video_name, fps):
         out.write(frame_array[i])
     out.release()
     return pathOut
-frames_path, fps = vid_to_frame(video_path, vid_name)
+# frames_path, fps = vid_to_frame(video_path, vid_name)
 # frames_path = os.path.join(video_path, 'frames')
-print(frames_path)
-print(fps)
-frame_to_video(frames_path, 'my_video2.mp4', fps)
+# print(frames_path)
+# print(fps)
+# frame_to_video(frames_path, 'my_video2.mp4', fps)
 
 
 
