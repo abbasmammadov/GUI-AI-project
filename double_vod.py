@@ -1,4 +1,3 @@
-from tabnanny import filename_only
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
