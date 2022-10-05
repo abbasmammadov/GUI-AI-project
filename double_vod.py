@@ -9,7 +9,7 @@ from threading import Thread
 from queue import Queue
 import os
 import argparse
-from ML_model.detect2 import run, ROOT # ROOT is ML_model in our case
+from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 from ML_model.frames import frame_to_video
 # from ML_model.frames import *
 #changed by Kaleb
@@ -200,18 +200,21 @@ class VideoPlayer(QWidget):
         self.select_yolov7 = QPushButton('YOLOv7')
         self.select_yolov7.setWindowTitle("Analyze Video")
         self.select_yolov7.setCheckable(True)
+        self.select_yolov7.setEnabled(False)
         self.select_yolov7.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
         self.select_yolov7.clicked.connect(self.select_model)
         
         self.select_yoloR = QPushButton('YOLO-R')
         self.select_yoloR.setWindowTitle("Analyze Video")
         self.select_yoloR.setCheckable(True)
+        self.select_yoloR.setEnabled(False)
         self.select_yoloR.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
         self.select_yoloR.clicked.connect(self.select_model)
         
         self.select_dino = QPushButton('DINO')
         self.select_dino.setWindowTitle("Analyze Video")
         self.select_dino.setCheckable(True)
+        self.select_dino.setEnabled(False)
         self.select_dino.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
         self.select_dino.clicked.connect(self.select_model)
 
