@@ -11,6 +11,7 @@ import os
 import argparse
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 from ML_model.frames import frame_to_video
+# from server import analyze_button
 # from ML_model.frames import *
 #changed by Kaleb
 filename = ''
@@ -25,10 +26,9 @@ def saved_dir_retrieve():
         return 'No directory selected'
     return saved_dir
 
-def wrapper(func, arg, queue):
-    queue.put(func(arg))
-
 # multithreading -> create a worker code
+import socket
+
 
 class Worker(QObject):
     finished = pyqtSignal()
@@ -36,6 +36,8 @@ class Worker(QObject):
 
     def run_analyze(self):
         """Long running task - analyzing"""
+        # we should perform this operation in the server side
+        
         print (str(ROOT))        
         filenm = filename_retrieve()
         # sources = 0 if camerabutton.isChecked() else str(filenm)
@@ -79,17 +81,8 @@ class Worker(QObject):
         opt = parse_opt()
         save_dir = run(**vars(opt))
         global saved_dir
-        # saved_dir = frame_to_video('output.mp4', 30, output_frames)
-        # how to run the above 2 functions in parallel
-        # q1, q2 = Queue(), Queue()
-        # Thread(target=wrapper, args=(run, opt, q1)).start()
-        # output_frames = q1.get()
-        # Thread(target=wrapper, args=(frame_to_video, output_frames, 30, q2)).start()
         saved_dir = save_dir
-        # saved_dir = q2.get()
-        # self.mediaPlayerResult = QMediaPlayer()
-        # fileName = str(saved_dir_retrieve())
-        # print(fileName)
+        
 
 
 class VideoAnalyzerButton(QPushButton, QMainWindow):
@@ -105,6 +98,12 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
         self.clicked.connect(self.analyze)
 
     def analyze(self):
+        soc = socket.socket() # create a socket object
+        host = '0.0.0.0' 
+        port = 999
+        soc.connect((host, port))
+        print('Connected to server')
+        mess = 'Sending analysis operation to server room'
         # Create a QThread object
         self.thread = QThread()
         # Create a worker object
@@ -127,7 +126,13 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
         self.thread.finished.connect(
             lambda: self.stepLabel.setText("Long-Running Step: 0")
         )
-   
+
+        soc.send(bytes(mess, 'utf-8'))
+
+        print(soc.recv(1024).decode())
+
+        soc.close()
+        
 
 class VideoPlayer(QWidget):
 
@@ -217,7 +222,6 @@ class VideoPlayer(QWidget):
         self.select_dino.setEnabled(False)
         self.select_dino.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
         self.select_dino.clicked.connect(self.select_model)
-
 
         self.analyze_button = VideoAnalyzerButton('Analyze ML model')
         self.analyze_button.setWindowTitle('Analyze video')
