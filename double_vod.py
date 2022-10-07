@@ -301,18 +301,20 @@ class VideoPlayer(QWidget):
     def open_video(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Upload the desired video",
                 ".", "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
+        global vid_name
+        vid_name = fileName.split('/')[-1]
 
         if fileName != '':
             self.mediaPlayer.setSource(QUrl.fromLocalFile(fileName))
             self.playButton.setEnabled(True)
-            self.statusBar.showMessage(fileName.split('/')[-1]) # instead of showing the whole directory, I made it to show only the name of the video
+            self.statusBar.showMessage(vid_name) # instead of showing the whole directory, I made it to show only the name of the video
             self.play()
             global filename 
             filename = fileName
             self.openButton.setEnabled(False)
 
     def showresult(self):
-        fileName = str(saved_dir_retrieve()) + '/ny5s_test_pyqt.mp4'
+        fileName = str(saved_dir_retrieve()) + '/' + vid_name
         # fileName = str(saved_dir_retrieve())
         print('#######')
         print(fileName)
