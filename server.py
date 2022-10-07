@@ -1,5 +1,5 @@
 import socket
-from double_vod import VideoAnalyzerButton, QMainWindow, QWidget
+from double_vod import *
 ser = socket.socket()
 host = '0.0.0.0'
 port = 999
@@ -23,7 +23,7 @@ c, address = ser.accept()
 print(' : ' + c.recv(1024).decode())
 # mess = input('Enter message : ')
 mess = 'starting the analysis procedure'
-# how to run the analysis procedure from double_vod.py file
+# how to run the analysis procedure here? 
 
 print(mess)
 c.send(bytes(mess, 'utf-8'))
