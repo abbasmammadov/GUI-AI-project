@@ -59,7 +59,7 @@ class Worker(QObject):
         save_dir, _ = s.recvfrom(1024)
         save_dir = save_dir.decode('utf-8')
         # save_dir = save_dir
-        print("Received from server: " + save_dir)
+        print("Received results from server: " + save_dir)
         s.close()
         # save_dir = run(**vars(opt))
         global saved_dir

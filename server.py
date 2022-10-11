@@ -46,7 +46,7 @@ def Main():
         message = message.decode('utf-8')
         (weights, source, datayaml) = message.split(',')[:-1]
         print("Message from: " + str(addr))
-        print("From connected user: " + message)
+        # print("From connected user: " + message) -> because message is very long
         print('starting analysis')
         print('--------------------')
         # do whatever you want with the data, and then send it back
