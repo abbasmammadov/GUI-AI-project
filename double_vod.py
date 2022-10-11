@@ -45,9 +45,9 @@ class Worker(QObject):
         # sources = 0 if camerabutton.isChecked() else str(filenm)
         # weights has made global
         datayml = str(ROOT) + '/data/coco128.yaml'
-        print(filenm)
-        print(wgths)
-        print(datayml)
+        # print(filenm)
+        # print(wgths)
+        # print(datayml)
         # let's send weights, data, and sources to the server
         host = '0.0.0.0'
         port = 999
@@ -281,7 +281,8 @@ class VideoPlayer(QWidget):
         """Long running task - analyzing"""        
         global wgths
         wgths = str(ROOT) + f'/checkpoints/yolov5s6.pt' # default selection -> yolov5
-        print(ROOT)
+        # print('Loading weights from ')
+        # print(ROOT)
         print(self.select_yolov5.isChecked())
         # if self.select_yolov5.isChecked():
             # self.select_yolov5.setEnabled(False)
