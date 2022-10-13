@@ -10,6 +10,8 @@ from ML_model.detect import ROOT # ROOT is ML_model in our case
 # from ML_model.frames import *
 #changed by Kaleb
 filename = ''
+result_is_done = False
+result_is_loaded = False
 def filename_retrieve():
     if filename ==  '':
         return 'No file selected'
@@ -51,9 +53,17 @@ class Worker(QObject):
         # save_dir = save_dir
         print("Received results from server: " + save_dir)
         s.close()
+        global result_is_done
+        result_is_done = True
         # save_dir = run(**vars(opt))
         global saved_dir
         saved_dir = save_dir
+        
+        statusBar = QStatusBar()
+        statusBar.setFont(QFont("Noto Sans", 10))
+        statusBar.setFixedHeight(14)
+        statusBar.showMessage('Analysis done. Click on the play button to view the result')
+
         
 
 
@@ -111,26 +121,26 @@ class VideoPlayer(QWidget):
         testbtn = QPushButton("Display status as text") # change it to -> show results as text
         testbtn.clicked.connect(self.test)
 
-        showresultbtn = QPushButton("Show Result")
-        showresultbtn.clicked.connect(self.showresult)
+        # showresultbtn = QPushButton("Show Result")
+        # showresultbtn.clicked.connect(self.showresult)
 
         # to add button vertically create a QPush button instance here
 
-        self.playButtonResult = QPushButton()
-        self.playButtonResult.setEnabled(True)
-        self.playButtonResult.setFixedHeight(24)
-        self.playButtonResult.setIconSize(btnSize)
-        self.playButtonResult.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
-        self.playButtonResult.clicked.connect(self.playResult)
+        # self.playButtonResult = QPushButton()
+        # self.playButtonResult.setEnabled(True)
+        # self.playButtonResult.setFixedHeight(24)
+        # self.playButtonResult.setIconSize(btnSize)
+        # self.playButtonResult.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
+        # self.playButtonResult.clicked.connect(self.playResult)
 
-        self.positionSliderResult = QSlider(Qt.Orientation.Horizontal)
-        self.positionSliderResult.setRange(0, 0)
-        self.positionSliderResult.sliderMoved.connect(self.setPositionResult)
+        # self.positionSliderResult = QSlider(Qt.Orientation.Horizontal)
+        # self.positionSliderResult.setRange(0, 0)
+        # self.positionSliderResult.sliderMoved.connect(self.setPositionResult)
 
         vodbelow = QHBoxLayout()
         vodbelow.setContentsMargins(0, 0, 0, 0)
-        vodbelow.addWidget(self.playButtonResult)
-        vodbelow.addWidget(self.positionSliderResult)
+        # vodbelow.addWidget(self.playButtonResult)
+        # vodbelow.addWidget(self.positionSliderResult)
         
         # another status bar for showing the file name of the analyzed video
 
@@ -142,7 +152,7 @@ class VideoPlayer(QWidget):
         layoutResult.addWidget(videoWidgetResult)
         layoutResult.addLayout(vodbelow)
         layoutResult.addWidget(self.statusBar2)
-        layoutResult.addWidget(showresultbtn)
+        # layoutResult.addWidget(showresultbtn)
         layoutResult.addWidget(testbtn)
 
         # add camera button on the top right corner
@@ -211,6 +221,7 @@ class VideoPlayer(QWidget):
         self.statusBar = QStatusBar()
         self.statusBar.setFont(QFont("Noto Sans", 10))
         self.statusBar.setFixedHeight(14)
+        self.statusBar.showMessage('Ready')
 
         # camerabutton = QPushButton('Camera')
         # camerabutton.setPosition(0, 0)
@@ -259,8 +270,8 @@ class VideoPlayer(QWidget):
 
         self.mediaPlayerResult.setVideoOutput(videoWidgetResult)
         self.mediaPlayerResult.playbackStateChanged.connect(self.mediaStateChangedResult)
-        self.mediaPlayerResult.positionChanged.connect(self.positionChangedResult)
-        self.mediaPlayerResult.durationChanged.connect(self.durationChangedResult)
+        self.mediaPlayerResult.positionChanged.connect(self.positionChanged)
+        self.mediaPlayerResult.durationChanged.connect(self.durationChanged)
         self.mediaPlayerResult.errorOccurred.connect(self.handleError)
 
     # def real_time(self):
@@ -304,7 +315,7 @@ class VideoPlayer(QWidget):
             filename = fileName
             self.openButton.setEnabled(False)
 
-    def showresult(self):
+    def load_result(self):
         fileName = str(saved_dir_retrieve()) + '/' + vid_name
         # fileName = str(saved_dir_retrieve())
         print('#######')
@@ -312,9 +323,10 @@ class VideoPlayer(QWidget):
         print('#######')
         self.mediaPlayerResult.setSource(QUrl.fromLocalFile(fileName))
         self.playButton.setEnabled(True)
+        # global result_is_loaded
+        # result_is_loaded = True
         # self.playButtonResult.setEnabled(True)
-        # self.statusBar2.showMessage(fileName.split('/')[-1] + ' with bboxes') # add trained
-        self.playResult()
+        # self.playResult()
 
     def name_of_file(self):
         print("Name of file")
@@ -322,13 +334,25 @@ class VideoPlayer(QWidget):
         return self.statusBar.currentMessage()
 
     def play(self):
+        print('result is done:', result_is_done)
+        # if not result_is_done:
+        #     print('Analysis is running. Please wait for a moment')
+        global result_is_loaded
+        if result_is_done and not result_is_loaded:
+            self.load_result()
+            result_is_loaded = True
+            
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
             self.mediaPlayer.pause()
+            if result_is_done:
+                self.mediaPlayerResult.pause()
         else:
             self.mediaPlayer.play()
+            if result_is_done:
+                self.mediaPlayerResult.play()
 
     def playResult(self):
-        if self.mediaPlayerResult.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
+        if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
             self.mediaPlayerResult.pause()
         else:
             self.mediaPlayerResult.play()
@@ -343,17 +367,19 @@ class VideoPlayer(QWidget):
 
     def mediaStateChangedResult(self, state):
         if self.mediaPlayerResult.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-            self.playButtonResult.setIcon(
+            self.playButton.setIcon(
                     self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPause))
         else:
-            self.playButtonResult.setIcon(
+            self.playButton.setIcon(
                     self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
 
     def positionChanged(self, position):
         self.positionSlider.setValue(position)
+        # if result_is_done:
+        #     self.positionChangedResult(position)
 
-    def positionChangedResult(self, position):
-        self.positionSliderResult.setValue(position)
+    # def positionChangedResult(self, position):
+    #     self.positionSliderResult.setValue(position)
     
     def test(self):
         print(filename_retrieve())
@@ -361,12 +387,16 @@ class VideoPlayer(QWidget):
 
     def durationChanged(self, duration):
         self.positionSlider.setRange(0, duration)
+    #     if result_is_done:
+    #         self.durationChangedResult(duration)
     
-    def durationChangedResult(self, duration):
-        self.positionSliderResult.setRange(0, duration)
+    # def durationChangedResult(self, duration):
+    #     self.positionSliderResult.setRange(0, duration)
 
     def setPosition(self, position):
         self.mediaPlayer.setPosition(position)
+        if result_is_done:
+            self.setPositionResult(position)
 
     def setPositionResult(self, position):
         self.mediaPlayerResult.setPosition(position)
