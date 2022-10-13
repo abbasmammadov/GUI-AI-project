@@ -1,3 +1,4 @@
+from turtle import left
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
@@ -59,10 +60,10 @@ class Worker(QObject):
         global saved_dir
         saved_dir = save_dir
         
-        statusBar = QStatusBar()
-        statusBar.setFont(QFont("Noto Sans", 10))
-        statusBar.setFixedHeight(14)
-        statusBar.showMessage('Analysis done. Click on the play button to view the result')
+        # statusBar = QStatusBar()
+        # statusBar.setFont(QFont("Noto Sans", 10))
+        # statusBar.setFixedHeight(14)
+        # statusBar.showMessage('Analysis done. Click on the play button to view the result')
 
         
 
@@ -116,10 +117,10 @@ class VideoPlayer(QWidget):
         videoWidget = QVideoWidget()
         # start
         videoWidgetResult = QVideoWidget()
-        videoWidget.setFixedHeight(250)
-        videoWidgetResult.setFixedHeight(250)
-        testbtn = QPushButton("Display status as text") # change it to -> show results as text
-        testbtn.clicked.connect(self.test)
+        # videoWidget.setFixedHeight(250)
+        # videoWidgetResult.setFixedHeight(250)
+        # testbtn = QPushButton("Display status as text") # change it to -> show results as text
+        # testbtn.clicked.connect(self.test)
 
         # showresultbtn = QPushButton("Show Result")
         # showresultbtn.clicked.connect(self.showresult)
@@ -137,23 +138,12 @@ class VideoPlayer(QWidget):
         # self.positionSliderResult.setRange(0, 0)
         # self.positionSliderResult.sliderMoved.connect(self.setPositionResult)
 
-        vodbelow = QHBoxLayout()
-        vodbelow.setContentsMargins(0, 0, 0, 0)
+        # vodbelow = QHBoxLayout()
+        # vodbelow.setContentsMargins(0, 0, 0, 0)
         # vodbelow.addWidget(self.playButtonResult)
         # vodbelow.addWidget(self.positionSliderResult)
         
         # another status bar for showing the file name of the analyzed video
-
-        self.statusBar2 = QStatusBar()
-        self.statusBar2.setFont(QFont("Noto Sans", 10))
-        self.statusBar2.setFixedHeight(14)
-
-        layoutResult = QVBoxLayout()
-        layoutResult.addWidget(videoWidgetResult)
-        layoutResult.addLayout(vodbelow)
-        layoutResult.addWidget(self.statusBar2)
-        # layoutResult.addWidget(showresultbtn)
-        layoutResult.addWidget(testbtn)
 
         # add camera button on the top right corner
 
@@ -232,33 +222,59 @@ class VideoPlayer(QWidget):
         # camerabutton.setIcon(QIcon('camera.png'))
         # camerabutton.clicked.connect(self.real_time)
 
-        controlLayout = QHBoxLayout()
-        controlLayout.setContentsMargins(0, 0, 0, 0)
-        controlLayout.addWidget(self.openButton)
-        controlLayout.addWidget(self.playButton)
-        controlLayout.addWidget(self.positionSlider)
+        # controlLayout = QHBoxLayout()
+        # controlLayout.setContentsMargins(0, 0, 0, 0)
+        # layoutUpload.addWidget(self.openButton)
+        # layoutUpload.addWidget(self.playButton)
+        # layoutUpload.addWidget(self.positionSlider)
 
         store_results_button = QPushButton('Download results')
         store_results_button.setEnabled(True)
         store_results_button.setFixedHeight(25)
         store_results_button.setIconSize(btnSize)
         # store_results_button.setIcon(QIcon('download.png'))
-        
+        videolayout = QHBoxLayout()
+        videolayout.addWidget(videoWidget)
+        videolayout.addWidget(videoWidgetResult)
         layoutUpload = QVBoxLayout()
         # layoutUpload.addWidget(camerabutton)
-        layoutUpload.addWidget(videoWidget)
-        layoutUpload.addLayout(controlLayout)
-        layoutUpload.addWidget(self.statusBar)
-        layoutUpload.addLayout(models)
-        layoutUpload.addWidget(self.analyze_button)
-        layoutUpload.addWidget(store_results_button)
+        # layoutUpload.addWidget(videoWidget)
+        layoutUpload.addLayout(videolayout)
+        layoutUpload.addWidget(self.openButton)
+        layoutUpload.addWidget(self.playButton)
+        layoutUpload.addWidget(self.positionSlider)
+        leftbuttons = QVBoxLayout()
+        # controls = QVBoxLayout()
+        analyze_and_get_results = QHBoxLayout()
+        # analyze_and_get_results.addWidget(self.analyze_button)
+        # layoutUpload.addLayout(controlLayout)
+        leftbuttons.addWidget(self.statusBar)
+        leftbuttons.addLayout(models)
+        leftbuttons.addWidget(self.analyze_button)
+        # leftbuttons.addWidget(store_results_button)
+        # controls.addLayout(analyze_and_get_results)
+        # controls.addWidget(store_results_button)
+        self.statusBar2 = QStatusBar()
+        self.statusBar2.setFont(QFont("Noto Sans", 10))
+        self.statusBar2.setFixedHeight(60)
+
+        layoutResult = QVBoxLayout()
+        # layoutResult.addWidget(videoWidgetResult)
+        # layoutResult.addLayout(vodbelow)
+        layoutResult.addWidget(self.statusBar2)
+        # layoutResult.addWidget(showresultbtn)
+        # layoutResult.addWidget(testbtn)
+        layoutResult.addWidget(store_results_button)
+        analyze_and_get_results.addLayout(leftbuttons)
+        analyze_and_get_results.addLayout(layoutResult)
+        layoutUpload.addLayout(analyze_and_get_results)
 
 
-        layout = QHBoxLayout()
-        layout.addLayout(layoutUpload)
-        layout.addLayout(layoutResult)
+        # layout = QHBoxLayout()
+        # layout.addLayout(layoutUpload)
+        # # layout.addLayout(layoutResult)
 
-        self.setLayout(layout)
+        self.setLayout(layoutUpload)
 
         self.mediaPlayer.setVideoOutput(videoWidget)
         self.mediaPlayer.playbackStateChanged.connect(self.mediaStateChanged)
@@ -407,7 +423,7 @@ class VideoPlayer(QWidget):
 
 class MyTableWidget(QWidget):
     
-    def __init__(self, parent):
+    def __init__(self, parent=None):
         super(QWidget, self).__init__(parent)
         self.layout = QVBoxLayout(self)
         self.tab_number = 1
@@ -439,8 +455,8 @@ class App(QMainWindow):
         self.title = 'PyQt6 - User interface to run object detection models'
         self.left = 600
         self.top = 300
-        self.width = 300
-        self.height = 200
+        self.width = 800
+        self.height = 600
         self.setWindowTitle(self.title)
         self.setGeometry(self.left, self.top, self.width, self.height)
         
