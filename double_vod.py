@@ -11,7 +11,6 @@ import os
 import argparse
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 from ML_model.frames import frame_to_video
-import client2
 import socket
 # from server import analyze_button
 # from ML_model.frames import *
@@ -29,9 +28,6 @@ def saved_dir_retrieve():
     return saved_dir
 
 # multithreading -> create a worker code
-import socket
-
-
 class Worker(QObject):
     finished = pyqtSignal()
     progress = pyqtSignal(int)
