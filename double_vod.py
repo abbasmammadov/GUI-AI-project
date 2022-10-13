@@ -4,14 +4,8 @@ from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow,
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget)
-from multiprocessing import Process, Pool
-from threading import Thread
-from queue import Queue
-import os
-import argparse
-from ML_model.detect import run, ROOT # ROOT is ML_model in our case
-from ML_model.frames import frame_to_video
 import socket
+from ML_model.detect import ROOT # ROOT is ML_model in our case
 # from server import analyze_button
 # from ML_model.frames import *
 #changed by Kaleb
