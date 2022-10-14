@@ -37,30 +37,30 @@ FILE = Path(__file__).resolve()
 ROOT = FILE.parents[0]  # YOLOv5 root directory
 if str(ROOT) not in sys.path:
     sys.path.append(str(ROOT))  # add ROOT to PATH
-# ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
-ROOT = Path(os.path.abspath(ROOT))  # absolute
+ROOT = Path(os.path.relpath(ROOT, Path.cwd()))  # relative
+
 from models.common import DetectMultiBackend
-from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadStreams
+from utils.dataloaders import IMG_FORMATS, VID_FORMATS, LoadImages, LoadScreenshots, LoadStreams
 from utils.general import (LOGGER, Profile, check_file, check_img_size, check_imshow, check_requirements, colorstr, cv2,
-                           increment_path, non_max_suppression, print_args, scale_coords, strip_optimizer, xyxy2xywh)
+                           increment_path, non_max_suppression, print_args, scale_boxes, strip_optimizer, xyxy2xywh)
 from utils.plots import Annotator, colors, save_one_box
 from utils.torch_utils import select_device, smart_inference_mode
-from PIL import Image
+
 
 @smart_inference_mode()
 def run(
-        weights=ROOT / 'yolov5s.pt',  # model.pt path(s)
-        source=ROOT / 'data/ny5s_test_pyqt.mp4',  # file/dir/URL/glob, 0 for webcam
+        weights=ROOT / 'yolov5s.pt',  # model path or triton URL
+        source=ROOT / 'data/images',  # file/dir/URL/glob/screen/0(webcam)
         data=ROOT / 'data/coco128.yaml',  # dataset.yaml path
         imgsz=(640, 640),  # inference size (height, width)
         conf_thres=0.25,  # confidence threshold
         iou_thres=0.45,  # NMS IOU threshold
         max_det=1000,  # maximum detections per image
         device='',  # cuda device, i.e. 0 or 0,1,2,3 or cpu
-        view_img=True,  # show results (True)
-        save_txt=True,  # save results to *.txt (True)
+        view_img=False,  # show results
+        save_txt=False,  # save results to *.txt
         save_conf=False,  # save confidences in --save-txt labels
-        save_crop=True,  # save cropped prediction boxes (True)
+        save_crop=False,  # save cropped prediction boxes
         nosave=False,  # do not save images/videos
         classes=None,  # filter by class: --class 0, or --class 0 2 3
         agnostic_nms=False,  # class-agnostic NMS
@@ -71,7 +71,7 @@ def run(
         name='exp',  # save results to project/name
         exist_ok=False,  # existing project/name ok, do not increment
         line_thickness=3,  # bounding box thickness (pixels)
-        hide_labels=True,  # hide labels
+        hide_labels=False,  # hide labels
         hide_conf=False,  # hide confidences
         half=False,  # use FP16 half-precision inference
         dnn=False,  # use OpenCV DNN for ONNX inference
@@ -82,6 +82,7 @@ def run(
     is_file = Path(source).suffix[1:] in (IMG_FORMATS + VID_FORMATS)
     is_url = source.lower().startswith(('rtsp://', 'rtmp://', 'http://', 'https://'))
     webcam = source.isnumeric() or source.endswith('.txt') or (is_url and not is_file)
+    screenshot = source.lower().startswith('screen')
     if is_url and is_file:
         source = check_file(source)  # download
 
@@ -96,24 +97,23 @@ def run(
     imgsz = check_img_size(imgsz, s=stride)  # check image size
 
     # Dataloader
+    bs = 1  # batch_size
     if webcam:
         view_img = check_imshow()
         dataset = LoadStreams(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
-        bs = len(dataset)  # batch_size
+        bs = len(dataset)
+    elif screenshot:
+        dataset = LoadScreenshots(source, img_size=imgsz, stride=stride, auto=pt)
     else:
         dataset = LoadImages(source, img_size=imgsz, stride=stride, auto=pt, vid_stride=vid_stride)
-        bs = 1  # batch_size
-        # dataset is a list of (img, img_path, vid_cap) tuples
     vid_path, vid_writer = [None] * bs, [None] * bs
 
     # Run inference
-    model.warmup(imgsz=(1 if pt else bs, 3, *imgsz))  # warmup
+    model.warmup(imgsz=(1 if pt or model.triton else bs, 3, *imgsz))  # warmup
     seen, windows, dt = 0, [], (Profile(), Profile(), Profile())
-    count = 0
-    output_frames = [] # list of output frames
     for path, im, im0s, vid_cap, s in dataset:
         with dt[0]:
-            im = torch.from_numpy(im).to(device)
+            im = torch.from_numpy(im).to(model.device)
             im = im.half() if model.fp16 else im.float()  # uint8 to fp16/32
             im /= 255  # 0 - 255 to 0.0 - 1.0
             if len(im.shape) == 3:
@@ -127,12 +127,12 @@ def run(
         # NMS
         with dt[2]:
             pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+
         # Second-stage classifier (optional)
         # pred = utils.general.apply_classifier(pred, classifier_model, im, im0s)
 
         # Process predictions
         for i, det in enumerate(pred):  # per image
-            count+=1
             seen += 1
             if webcam:  # batch_size >= 1
                 p, im0, frame = path[i], im0s[i].copy(), dataset.count
@@ -149,7 +149,7 @@ def run(
             annotator = Annotator(im0, line_width=line_thickness, example=str(names))
             if len(det):
                 # Rescale boxes from img_size to im0 size
-                det[:, :4] = scale_coords(im.shape[2:], det[:, :4], im0.shape).round()
+                det[:, :4] = scale_boxes(im.shape[2:], det[:, :4], im0.shape).round()
 
                 # Print results
                 for c in det[:, 5].unique():
@@ -173,8 +173,6 @@ def run(
 
             # Stream results
             im0 = annotator.result()
-            output_frames.append(im0[:, :, ::-1].copy()) # append output frame])
-            # Image.fromarray(im0[:, :, ::-1]).save(f'{save_dir}/image{count}.jpg') # the type of im0 is numpy.ndarray
             if view_img:
                 if platform.system() == 'Linux' and p not in windows:
                     windows.append(p)
@@ -218,8 +216,8 @@ def run(
 
 def parse_opt():
     parser = argparse.ArgumentParser()
-    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model path(s)')
-    parser.add_argument('--source', type=str, default=ROOT / 'data/ny5s_test_pyqt.mp4', help='file/dir/URL/glob, 0 for webcam')
+    parser.add_argument('--weights', nargs='+', type=str, default=ROOT / 'yolov5s.pt', help='model path or triton URL')
+    parser.add_argument('--source', type=str, default=ROOT / 'data/images', help='file/dir/URL/glob/screen/0(webcam)')
     parser.add_argument('--data', type=str, default=ROOT / 'data/coco128.yaml', help='(optional) dataset.yaml path')
     parser.add_argument('--imgsz', '--img', '--img-size', nargs='+', type=int, default=[640], help='inference size h,w')
     parser.add_argument('--conf-thres', type=float, default=0.25, help='confidence threshold')

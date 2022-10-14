@@ -37,7 +37,7 @@ class Worker(QObject):
         filenm = filename_retrieve()
         # sources = 0 if camerabutton.isChecked() else str(filenm)
         # weights has made global
-        datayml = str(ROOT) + '/data/coco128.yaml'
+        datayml = str(ROOT) + '/data/railway_components.yaml'
         # print(filenm)
         # print(wgths)
         # print(datayml)
@@ -146,13 +146,13 @@ class VideoPlayer(QWidget):
         # another status bar for showing the file name of the analyzed video
 
         # add camera button on the top right corner
-
+        
         self.openButton = QPushButton("Upload Video")   
         self.openButton.setToolTip("Open Video File")
         self.openButton.setStatusTip("Open Video File")
         self.openButton.setFixedHeight(24)
         self.openButton.setIconSize(btnSize)
-        self.openButton.setFont(QFont("Noto Sans", 8))
+        # self.openButton.setFont(QFont("Noto Sans", 8))
         self.openButton.setIcon(QIcon.fromTheme("document-open", QIcon("upload-icon.png")))
         self.openButton.clicked.connect(self.open_video)
 
@@ -196,13 +196,30 @@ class VideoPlayer(QWidget):
         models.addWidget(self.select_yoloR)
         models.addWidget(self.select_dino)
 
-        self.playButton = QPushButton()
+        self.playbuttons = QHBoxLayout()
+        self.playButton = QPushButton('Play')
         self.playButton.setEnabled(True)
         self.playButton.setCheckable(True)
         self.playButton.setFixedHeight(24)
         self.playButton.setIconSize(btnSize)
         self.playButton.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
         self.playButton.clicked.connect(self.play)
+
+        self.fastforward = QPushButton('+10s')
+        self.fastforward.setEnabled(True)
+        # self.fastforward.setCheckable(True)
+        self.fastforward.setFixedHeight(24)
+        self.fastforward.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSeekForward))
+
+        self.skipbackward = QPushButton('-10s')
+        self.skipbackward.setEnabled(True)
+        # self.skipbackward.setCheckable(True)
+        self.skipbackward.setFixedHeight(24)
+        self.skipbackward.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSeekBackward))
+        
+        self.playbuttons.addWidget(self.skipbackward)
+        self.playbuttons.addWidget(self.playButton)
+        self.playbuttons.addWidget(self.fastforward)
 
         self.positionSlider = QSlider(Qt.Orientation.Horizontal)
         self.positionSlider.setRange(0, 0)
@@ -241,7 +258,8 @@ class VideoPlayer(QWidget):
         # layoutUpload.addWidget(videoWidget)
         layoutUpload.addLayout(videolayout)
         layoutUpload.addWidget(self.openButton)
-        layoutUpload.addWidget(self.playButton)
+        # layoutUpload.addWidget(self.playButton)
+        layoutUpload.addLayout(self.playbuttons)
         layoutUpload.addWidget(self.positionSlider)
         leftbuttons = QVBoxLayout()
         # controls = QVBoxLayout()
@@ -297,7 +315,17 @@ class VideoPlayer(QWidget):
     def select_model(self):
         """Long running task - analyzing"""        
         global wgths
-        wgths = str(ROOT) + f'/checkpoints/yolov5s6.pt' # default selection -> yolov5
+        wgths = str(ROOT) + f'/checkpoints/yolov5_best.pt' # default selection -> yolov5
+        
+        print('*****')
+        print('*****')
+        print('*****')
+        print('*****')
+        print(wgths)
+        print('*****')
+        print('*****')
+        print('*****')
+        print('*****')
         # print('Loading weights from ')
         # print(ROOT)
         print(self.select_yolov5.isChecked())
