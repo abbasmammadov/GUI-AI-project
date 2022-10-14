@@ -78,14 +78,6 @@ def Main():
         message, addr = s.recvfrom(1024)
         message = message.decode('utf-8')
         (weights, source, datayaml) = message.split(',')[:-1]
-        
-        print('####WEIGHTS####')
-        print('####WEIGHTS####')
-        print('####WEIGHTS####')
-        print(weights)
-        print('####WEIGHTS####')
-        print('####WEIGHTS####')
-        print('####WEIGHTS####')
         print("Message from: " + str(addr))
         # print("From connected user: " + message) -> because message is very long
         print('starting analysis')
@@ -97,6 +89,12 @@ def Main():
         print('analysis done')
         print("Sending: " + save_dir)
         s.sendto(save_dir.encode('utf-8'), addr)
+        to_close = input('Do you want to close the server? (y/n): ')
+        if to_close.lower() == 'y':
+            print('Server closed')
+            break
+        else:
+            print('Server still running')
     s.close()
 
 if __name__=='__main__':

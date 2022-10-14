@@ -316,19 +316,9 @@ class VideoPlayer(QWidget):
         """Long running task - analyzing"""        
         global wgths
         wgths = str(ROOT) + f'/checkpoints/yolov5_best.pt' # default selection -> yolov5
-        
-        print('*****')
-        print('*****')
-        print('*****')
-        print('*****')
-        print(wgths)
-        print('*****')
-        print('*****')
-        print('*****')
-        print('*****')
         # print('Loading weights from ')
         # print(ROOT)
-        print(self.select_yolov5.isChecked())
+        # print(self.select_yolov5.isChecked())
         # if self.select_yolov5.isChecked():
             # self.select_yolov5.setEnabled(False)
         if self.select_yolov7.isChecked():
@@ -378,7 +368,7 @@ class VideoPlayer(QWidget):
         return self.statusBar.currentMessage()
 
     def play(self):
-        print('result is done:', result_is_done)
+        # print('result is done:', result_is_done)
         # if not result_is_done:
         #     print('Analysis is running. Please wait for a moment')
         global result_is_loaded
@@ -387,13 +377,13 @@ class VideoPlayer(QWidget):
             result_is_loaded = True
             
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-            self.mediaPlayer.pause()
             if result_is_done:
                 self.mediaPlayerResult.pause()
+            self.mediaPlayer.pause()
         else:
-            self.mediaPlayer.play()
             if result_is_done:
                 self.mediaPlayerResult.play()
+            self.mediaPlayer.play()
 
     def playResult(self):
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
@@ -438,9 +428,9 @@ class VideoPlayer(QWidget):
     #     self.positionSliderResult.setRange(0, duration)
 
     def setPosition(self, position):
-        self.mediaPlayer.setPosition(position)
         if result_is_done:
             self.setPositionResult(position)
+        self.mediaPlayer.setPosition(position)
 
     def setPositionResult(self, position):
         self.mediaPlayerResult.setPosition(position)
