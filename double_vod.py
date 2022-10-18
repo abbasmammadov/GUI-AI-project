@@ -1,4 +1,5 @@
 from turtle import left
+from unittest import result
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
@@ -7,12 +8,26 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMa
         QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget)
 import socket
 from ML_model.detect import ROOT # ROOT is ML_model in our case
+import json
 # from server import analyze_button
 # from ML_model.frames import *
 #changed by Kaleb
 filename = ''
-result_is_done = False
-result_is_loaded = False
+
+
+global_result = {}
+class GlobalResultPerCamera():
+    
+    def __init__(self, camera_number):
+        self.result_is_done = False
+        self.result_is_loaded = False
+        self.result = None
+        self.camera_number = camera_number
+    
+    def __str__(self):
+        return f"Camera {self.camera_number} -> result: {self.result}"
+        
+        
 def filename_retrieve():
     if filename ==  '':
         return 'No file selected'
@@ -28,6 +43,10 @@ def saved_dir_retrieve():
 class Worker(QObject):
     finished = pyqtSignal()
     progress = pyqtSignal(int)
+    
+    def __init__(self, tab_number):
+        super().__init__()
+        self.tab_number = tab_number
 
     def run_analyze(self):
         """Long running task - analyzing"""
@@ -52,13 +71,26 @@ class Worker(QObject):
         save_dir, _ = s.recvfrom(1024)
         save_dir = save_dir.decode('utf-8')
         # save_dir = save_dir
+        
         print("Received results from server: " + save_dir)
         s.close()
-        global result_is_done
-        result_is_done = True
         # save_dir = run(**vars(opt))
         global saved_dir
         saved_dir = save_dir
+        # we should read from result.json file
+        # to do that let's run the command below
+        curr_camera_number = f'Camera-{self.tab_number}'
+        global_result[curr_camera_number].result_is_done = True
+        with open(save_dir + '/result.json', 'r') as f:
+            result = f.read()  # type: ignore
+            # print(eval(result))
+            # print(type(eval(result)))
+            global_result[curr_camera_number].result = eval(result)
+
+        json_output = {camera_num: camera_values.result for camera_num, camera_values in global_result.items()}
+        # then write this result to global_result.json file
+        with open('global_result.json', 'w') as f:
+            json.dump(json_output, f)
         
         # statusBar = QStatusBar()
         # statusBar.setFont(QFont("Noto Sans", 10))
@@ -69,7 +101,7 @@ class Worker(QObject):
 
 
 class VideoAnalyzerButton(QPushButton, QMainWindow):
-    def __init__(self, parent=None):
+    def __init__(self, tab_number, parent=None):
         super(VideoAnalyzerButton, self).__init__(parent)
         self.setAccessibleName("analyze_button")
         self.setToolTip("Apply ML Model")
@@ -79,12 +111,12 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
         self.setFont(QFont("Noto Sans", 8))
         self.setIcon(QIcon("analyze.png"))
         self.clicked.connect(self.analyze)
-
+        self.tab_number = tab_number
     def analyze(self):
         # Create a QThread object
         self.thread = QThread()
         # Create a worker object
-        self.worker = Worker()
+        self.worker = Worker(self.tab_number)
         # Move worker to the thread
         self.worker.moveToThread(self.thread)
         # Connect signals and slots
@@ -107,12 +139,18 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
 
 class VideoPlayer(QWidget):
 
-    def __init__(self, parent=None):
+    def __init__(self, tab_number, parent=None):
         super(VideoPlayer, self).__init__(parent)
+        self.tab_number = tab_number
+        self.curr_camera_number = f'Camera-{self.tab_number}'
+
+        global_result[self.curr_camera_number] = GlobalResultPerCamera(self.curr_camera_number)
+        # global result_is_done, result_is_loaded
+        # result_is_done = False
+        # result_is_loaded = False
         
         self.mediaPlayer = QMediaPlayer()
         self.mediaPlayerResult = QMediaPlayer()
-
         btnSize = QSize(16, 16)
         videoWidget = QVideoWidget()
         # start
@@ -183,7 +221,7 @@ class VideoPlayer(QWidget):
         self.select_dino.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
         self.select_dino.clicked.connect(self.select_model)
 
-        self.analyze_button = VideoAnalyzerButton('Analyze ML model')
+        self.analyze_button = VideoAnalyzerButton(self.tab_number, 'Analyze ML model')
         self.analyze_button.setWindowTitle('Analyze video')
         self.analyze_button.setCheckable(True)
         self.analyze_button.setEnabled(False)
@@ -249,7 +287,8 @@ class VideoPlayer(QWidget):
         store_results_button.setEnabled(True)
         store_results_button.setFixedHeight(25)
         store_results_button.setIconSize(btnSize)
-        # store_results_button.setIcon(QIcon('download.png'))
+        store_results_button.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_ArrowDown))        
+        # store_results_button.clicked.connect(self.download_results)
         videolayout = QHBoxLayout()
         videolayout.addWidget(videoWidget)
         videolayout.addWidget(videoWidgetResult)
@@ -312,6 +351,9 @@ class VideoPlayer(QWidget):
     #     global source
     #     source = 0 # set the source 0
 
+    def download_results(self):
+        pass
+    
     def select_model(self):
         """Long running task - analyzing"""        
         global wgths
@@ -371,17 +413,17 @@ class VideoPlayer(QWidget):
         # print('result is done:', result_is_done)
         # if not result_is_done:
         #     print('Analysis is running. Please wait for a moment')
-        global result_is_loaded
-        if result_is_done and not result_is_loaded:
+        
+        if global_result[self.curr_camera_number].result_is_done and not global_result[self.curr_camera_number].result_is_loaded:
             self.load_result()
-            result_is_loaded = True
+            global_result[self.curr_camera_number].result_is_loaded = True
             
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-            if result_is_done:
+            if global_result[self.curr_camera_number].result_is_done:
                 self.mediaPlayerResult.pause()
             self.mediaPlayer.pause()
         else:
-            if result_is_done:
+            if global_result[self.curr_camera_number].result_is_done:
                 self.mediaPlayerResult.play()
             self.mediaPlayer.play()
 
@@ -409,7 +451,7 @@ class VideoPlayer(QWidget):
 
     def positionChanged(self, position):
         self.positionSlider.setValue(position)
-        # if result_is_done:
+        # if global_result[self.curr_camera_number].result_is_done:
         #     self.positionChangedResult(position)
 
     # def positionChangedResult(self, position):
@@ -421,14 +463,14 @@ class VideoPlayer(QWidget):
 
     def durationChanged(self, duration):
         self.positionSlider.setRange(0, duration)
-    #     if result_is_done:
+    #     if global_result[self.curr_camera_number].result_is_done:
     #         self.durationChangedResult(duration)
     
     # def durationChangedResult(self, duration):
     #     self.positionSliderResult.setRange(0, duration)
 
     def setPosition(self, position):
-        if result_is_done:
+        if global_result[self.curr_camera_number].result_is_done:
             self.setPositionResult(position)
         self.mediaPlayer.setPosition(position)
 
@@ -452,7 +494,7 @@ class MyTableWidget(QWidget):
         self.add_tab_icon.setStyleSheet("background-color: blue")
         self.add_tab_icon.clicked.connect(self.add_tab)
         self.tabs.setCornerWidget(self.add_tab_icon, Qt.Corner.TopLeftCorner)
-        self.tab1 = VideoPlayer()
+        self.tab1 = VideoPlayer(self.tab_number)
         self.tabs.addTab(self.tab1,f"CAM {self.tab_number}")
         self.tabs.resize(300,200)
         self.layout.addWidget(self.tabs)
@@ -462,7 +504,7 @@ class MyTableWidget(QWidget):
         
     def add_tab(self):
         self.tab_number += 1
-        self.new_tab = VideoPlayer()
+        self.new_tab = VideoPlayer(self.tab_number)
         self.tabs.addTab(self.new_tab, f"CAM {self.tab_number}")
         
         

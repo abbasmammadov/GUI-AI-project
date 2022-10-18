@@ -156,8 +156,8 @@ def run(
                     n = (det[:, 5] == c).sum()  # detections per class
                     s += f"{n} {names[int(c)]}{'s' * (n > 1)}, "  # add to string
                     # how to write this info on a json file? 
-                    # print('this is the result of the detection: ', s)
-
+                    # print('this is the result of the detection: ', s.split('.'))
+                    
                 # Write results
                 for *xyxy, conf, cls in reversed(det):
                     if save_txt:  # Write to file
@@ -204,9 +204,12 @@ def run(
 
         # Print time (inference-only)
         my_info = f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms"
-        result_dict[f'{p.stem}'] = my_info.split(' ')
+        result_dict[my_info.split('.')[0].split(')')[0] + ')'] = my_info.split(':')[-1]
+        # print(result_dict)
         LOGGER.info(f"{s}{'' if len(det) else '(no detections), '}{dt[1].dt * 1E3:.1f}ms")
-    print(result_dict)
+    # let's write result dict to a json file
+    with open(str(save_dir) + '/result.json', 'w') as fp:
+        json.dump(result_dict, fp)
     # Print results
     t = tuple(x.t / seen * 1E3 for x in dt)  # speeds per image
     LOGGER.info(f'Speed: %.1fms pre-process, %.1fms inference, %.1fms NMS per image at shape {(1, 3, *imgsz)}' % t)
