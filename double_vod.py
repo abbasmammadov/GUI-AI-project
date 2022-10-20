@@ -27,7 +27,7 @@ class GlobalResultPerCamera():
     def __str__(self):
         return f"Camera {self.camera_number} -> result: {self.result}"
         
-        
+frame_skip_second = 1
 def filename_retrieve():
     if filename ==  '':
         return 'No file selected'
@@ -243,18 +243,22 @@ class VideoPlayer(QWidget):
         self.playButton.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaPlay))
         self.playButton.clicked.connect(self.play)
 
-        self.fastforward = QPushButton('+10s')
+        self.fastforward = QPushButton(f'+{frame_skip_second}s')
         self.fastforward.setEnabled(True)
         # self.fastforward.setCheckable(True)
         self.fastforward.setFixedHeight(24)
         self.fastforward.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSeekForward))
+        self.fastforward.clicked.connect(self.forward10)
 
-        self.skipbackward = QPushButton('-10s')
+
+        self.skipbackward = QPushButton(f'-{frame_skip_second}s')
         self.skipbackward.setEnabled(True)
         # self.skipbackward.setCheckable(True)
         self.skipbackward.setFixedHeight(24)
         self.skipbackward.setIcon(self.style().standardIcon(QStyle.StandardPixmap.SP_MediaSeekBackward))
-        
+        self.skipbackward.clicked.connect(self.back10)
+
+
         self.playbuttons.addWidget(self.skipbackward)
         self.playbuttons.addWidget(self.playButton)
         self.playbuttons.addWidget(self.fastforward)
@@ -353,7 +357,11 @@ class VideoPlayer(QWidget):
 
     def download_results(self):
         pass
+    def forward10(self):
+        self.mediaPlayer.setPosition(self.mediaPlayer.position() + 1000 * frame_skip_second) # 1 second forward
     
+    def back10(self):
+        self.mediaPlayer.setPosition(self.mediaPlayer.position() - 1000 * frame_skip_second) # 1 second backward
     def select_model(self):
         """Long running task - analyzing"""        
         global wgths
