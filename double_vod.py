@@ -318,7 +318,7 @@ class VideoPlayer(QWidget):
         self.statusBar2 = QStatusBar()
         self.statusBar2.setFont(QFont("Noto Sans", 10))
         self.statusBar2.setFixedHeight(60)
-
+        self.statusBar2.showMessage('Result\n')
         layoutResult = QVBoxLayout()
         # layoutResult.addWidget(videoWidgetResult)
         # layoutResult.addLayout(vodbelow)
@@ -359,9 +359,11 @@ class VideoPlayer(QWidget):
         pass
     def forward10(self):
         self.mediaPlayer.setPosition(self.mediaPlayer.position() + 1000 * frame_skip_second) # 1 second forward
+        self.mediaPlayerResult.setPosition(self.mediaPlayer.position() + 1000 * frame_skip_second) # 1 second forward
     
     def back10(self):
         self.mediaPlayer.setPosition(self.mediaPlayer.position() - 1000 * frame_skip_second) # 1 second backward
+        self.mediaPlayerResult.setPosition(self.mediaPlayer.position() - 1000 * frame_skip_second) # 1 second backward
     def select_model(self):
         """Long running task - analyzing"""        
         global wgths
