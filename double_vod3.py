@@ -425,49 +425,15 @@ class VideoPlayer(QWidget):
         if global_result[self.curr_camera_number].result_is_done and not global_result[self.curr_camera_number].result_is_loaded:
             self.load_result()
             global_result[self.curr_camera_number].result_is_loaded = True
-        
-        # import multithreading
-        def play_raw_video(self, start_time):
-            # if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-            #     self.mediaPlayer.pause()
-            while 1:
-                if time.time() > start_time + 1:
-                    self.mediaPlayer.play()
-                    break
-                else:
-                    time.sleep(0.01)
-            #self.mediaPlayer.play()
-        
-        def play_result_video(self, start_time):
-            while 1:
-                if time.time() > start_time + 1:
-                    self.mediaPlayerResult.play()
-                    break
-                else:
-                    time.sleep(0.01) 
-            # if global_result[self.curr_camera_number].result_is_done:
-                # if self.mediaPlayerResult.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-                    # self.mediaPlayerResult.pause()
             
-            # else:
-            #     pass
-        import threading
-        start_time = time.time()
-        t1 = threading.Thread(target=play_raw_video, args=(self,start_time))
-        t2 = threading.Thread(target=play_result_video, args=(self,start_time))
-        
-
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
             if global_result[self.curr_camera_number].result_is_done:
                 self.mediaPlayerResult.pause()
             self.mediaPlayer.pause()
-        else: # how to play both videos at the same time using multi-threading?
-            starttime = time.time()
+        else:
             if global_result[self.curr_camera_number].result_is_done:
-                # self.mediaPlayerResult.play()
-               t2.start()
-            # self.mediaPlayer.play()
-            t1.start()
+                self.mediaPlayerResult.play()
+            self.mediaPlayer.play()
 
     def playResult(self):
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
