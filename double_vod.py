@@ -16,6 +16,46 @@ filename = ''
 
 
 global_result = {}
+
+def send_file_to_server(file_path):
+            import time            
+            with open(filename, 'rb') as f:
+                c = 0
+                # starting the time counter
+                start_time = time.time()
+
+                while c <= file_size:
+                    data = f.read(1024)
+                    if not data:
+                        break
+                    
+                    client.sendall(data)
+                    c += len(data)
+                
+                # ending the time counter
+                end_time = time.time()
+            
+            print('File sent to server')
+            print(f"Time taken to send the file: {end_time - start_time}")
+ def receive_file(file_path):
+            import time
+            with open(file_path, 'wb') as f:
+                # starting the time counter
+                start_time = time.time()
+                c = 0
+                while c < int(file_size):
+                    data = client.recv(1024)
+                    if not data:
+                        break
+                    f.write(data)
+                    c += len(data)
+                
+                # ending the time counter
+                end_time = time.time()
+            
+            print('File received from server')
+            print(f"Time taken to receive the file: {end_time - start_time}")
+            return f
 class GlobalResultPerCamera():
     
     def __init__(self, camera_number):
