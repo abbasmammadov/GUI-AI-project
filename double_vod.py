@@ -9,53 +9,15 @@ from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMa
 import socket
 from ML_model.detect import ROOT # ROOT is ML_model in our case
 import json
+import os
 # from server import analyze_button
 # from ML_model.frames import *
 #changed by Kaleb
 filename = ''
-
+buffer_size = 100
 
 global_result = {}
 
-def send_file_to_server(file_path):
-            import time            
-            with open(filename, 'rb') as f:
-                c = 0
-                # starting the time counter
-                start_time = time.time()
-
-                while c <= file_size:
-                    data = f.read(1024)
-                    if not data:
-                        break
-                    
-                    client.sendall(data)
-                    c += len(data)
-                
-                # ending the time counter
-                end_time = time.time()
-            
-            print('File sent to server')
-            print(f"Time taken to send the file: {end_time - start_time}")
- def receive_file(file_path):
-            import time
-            with open(file_path, 'wb') as f:
-                # starting the time counter
-                start_time = time.time()
-                c = 0
-                while c < int(file_size):
-                    data = client.recv(1024)
-                    if not data:
-                        break
-                    f.write(data)
-                    c += len(data)
-                
-                # ending the time counter
-                end_time = time.time()
-            
-            print('File received from server')
-            print(f"Time taken to receive the file: {end_time - start_time}")
-            return f
 class GlobalResultPerCamera():
     
     def __init__(self, camera_number):
@@ -96,24 +58,88 @@ class Worker(QObject):
         filenm = filename_retrieve()
         # sources = 0 if camerabutton.isChecked() else str(filenm)
         # weights has made global
-        datayml = str(ROOT) + '/data/railway_components.yaml'
+        # datayml = str(ROOT) + '/data/railway_components.yaml'
         # print(filenm)
         # print(wgths)
         # print(datayml)
         # let's send weights, data, and sources to the server
-        host = '0.0.0.0'
-        port = 999
+        host = '125.138.99.152'
+        # host = '0.0.0.0'
+        # port = 7024
+        port = 21537
         server = (host, port) # replace with server IP_addr
-        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-        # we should convert the message to string so that we can easily convert it to bytes
-        message = "".join([word + "," for word in [wgths, filenm, datayml]])
-        s.sendto(message.encode('utf-8'), server)
-        save_dir, _ = s.recvfrom(1024)
-        save_dir = save_dir.decode('utf-8')
-        # save_dir = save_dir
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(server)
         
-        print("Received results from server: " + save_dir)
+        # first we have to send the video file
+        # we have to send the filename andn file size
+        print(filenm)
+        print(os.path.getsize(filenm))
+        video_size = os.path.getsize(filenm)
+        s.send(filenm.encode('utf-8'))
+        s.send(str(video_size).encode('utf-8'))
+        
+        print('path of the file to be sent: ', filenm)
+        with open(filenm, 'rb') as f:
+            # c = 0
+            # while c <= video_size:
+            # while True:
+            data = f.read()
+            print(data)
+            s.sendall(data)
+            # print(f"Sent {c} bytes")
+            # c+=len(data)
+            # if not data:
+        print('Video has been sent to the server')
+        msg = 'Video has been sent to the server'
+        s.send(msg.encode('utf-8'))
+        
+        # now we should receive a message from the server to initialize status-bar percentage
+        msg = s.recv(buffer_size).decode('utf-8')
+        if 'status-bar' in msg:
+            # initialize status-bar
+            # to do this, we have to send the number of frames in the video
+            # then we have to receive the number of frames in the video
+            pass
+        # s.close()
+        # since we are receiving the result from the server, we have to wait for the result
+        # to do that we have to create a socket and listen to the server
+        # s2 = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # s2.bind(server)
+        # s2.listen(5)
+        # s2.connect(server)
+        # let's2 receive the name of the result video and it's2 size
+        # client, _ = s.accept()
+        msg = s.recv(buffer_size).decode('utf-8')
+        print('message from server: ', msg)
+        print('now lets take the result video')
+        result_vid = s.recv(buffer_size).decode('utf-8')
+        # result_vid_filesize = s2.recv(buffer_size).decode('utf-8')
+        save_dir = '/'.join(result_vid.split('/')[:-1])
+        
+        print('resulting video is: ', result_vid)
+        print('it is saved in: ', save_dir)
+        # ML_model/runs/detect/exp/vid.mp4, if it couldn't do that, we will load from the ROOT path
+        
+        # now let's2 receive the result video
+        print('starting to receive the result video')
+        data = s.recv(buffer_size)
+        with open(result_vid, 'wb') as f:
+            c = 0
+            # while c <= result_vid_filesize:
+            while data:
+                f.write(data)
+                print('data / buffer -', c)
+                c+=1
+        msg = s.recv(buffer_size).decode('utf-8')
+        print('message from server: ', msg)
+        
+        print('received result video from server')
+        print('result video is saved in: ', result_vid)
+        
+        print('closing server connection')
         s.close()
+        # s.close()
         # save_dir = run(**vars(opt))
         global saved_dir
         saved_dir = save_dir
