@@ -36,9 +36,10 @@ def parse_opt(weights, source, datayaml):
     return opt
 def Main():
  
-    host = '0.0.0.0'
+    # host = '0.0.0.0'
     port = 999
-
+    host = socket.gethostbyname(socket.gethostname())
+    print('name of the host:', host)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     s.bind((host, port))
 

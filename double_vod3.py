@@ -1,12 +1,14 @@
 from PyQt6.QtGui import QIcon, QFont
-from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
+from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread, QTimer
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
-from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow,
-        QPushButton, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget)
+from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow, 
+        QPushButton, QProgressBar, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget)
 import socket
 from ML_model.detect import ROOT # ROOT is ML_model in our case
 import json
+import os
+from random import randint
 # from server import analyze_button
 # from ML_model.frames import *
 #changed by Kaleb
@@ -19,12 +21,60 @@ class GlobalResultPerCamera():
     def __init__(self, camera_number):
         self.result_is_done = False
         self.result_is_loaded = False
+        # self.analysis_started = False
         self.result = None
         self.camera_number = camera_number
     
     def __str__(self):
         return f"Camera {self.camera_number} -> result: {self.result}"
-        
+
+StyleSheet = '''
+#RedProgressBar {
+    text-align: center;
+}
+#RedProgressBar::chunk {
+    background-color: #F44336;
+}
+#GreenProgressBar {
+    min-height: 12px;
+    max-height: 12px;
+    border-radius: 6px;
+}
+#GreenProgressBar::chunk {
+    border-radius: 6px;
+    background-color: #009688;
+}
+#BlueProgressBar {
+    border: 2px solid #2196F3;
+    border-radius: 5px;
+    background-color: #E0E0E0;
+}
+#BlueProgressBar::chunk {
+    background-color: #2196F3;
+    width: 10px; 
+    margin: 0.5px;
+}
+'''
+
+
+class ProgressBar(QProgressBar):
+
+    def __init__(self, *args, **kwargs):
+        super(ProgressBar, self).__init__(*args, **kwargs)
+        self.setValue(0)
+        if self.minimum() != self.maximum():
+            self.timer = QTimer(self, timeout=self.onTimeout)
+            self.timer.start(randint(1, 3) * 1000)
+
+    def onTimeout(self):
+        if self.value() >= 100:
+            self.timer.stop()
+            self.timer.deleteLater()
+            del self.timer
+            return
+        self.setValue(self.value() + 1)
+
+    
 frame_skip_second = 1
 def filename_retrieve():
     if filename ==  '':
@@ -59,7 +109,7 @@ class Worker(QObject):
         # print(wgths)
         # print(datayml)
         # let's send weights, data, and sources to the server
-        host = '0.0.0.0'
+        host = '172.30.1.33' # enter your local server ip address here
         port = 999
         server = (host, port) # replace with server IP_addr
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -113,12 +163,15 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
     def analyze(self):
         # Create a QThread object
         self.thread = QThread()
+        self.thread2 = QThread()
         # Create a worker object
         self.worker = Worker(self.tab_number)
         # Move worker to the thread
         self.worker.moveToThread(self.thread)
         # Connect signals and slots
         self.thread.started.connect(self.worker.run_analyze)
+        # global_result[self.tab_number].analysis_started = True
+        # self.thread2.started.connect(self.progress)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.thread.deleteLater)
@@ -219,6 +272,7 @@ class VideoPlayer(QWidget):
         self.select_dino.setStyleSheet("QPushButton:checked {color: white; background-color: green;}")
         self.select_dino.clicked.connect(self.select_model)
 
+        
         self.analyze_button = VideoAnalyzerButton(self.tab_number, 'Analyze ML model')
         self.analyze_button.setWindowTitle('Analyze video')
         self.analyze_button.setCheckable(True)
@@ -315,12 +369,35 @@ class VideoPlayer(QWidget):
         # controls.addWidget(store_results_button)
         self.statusBar2 = QStatusBar()
         self.statusBar2.setFont(QFont("Noto Sans", 10))
-        self.statusBar2.setFixedHeight(60)
-        self.statusBar2.showMessage('Result\n')
+        self.statusBar2.setFixedHeight(20)
+        self.statusBar2.showMessage('Progress Result display')
+        
+        self.progress = ProgressBar()
+        import time
+        # # initialize start time
+        # if global_result[self.tab_number].analyzed:
+        #     self.progress.setValue(100)
+        #     self.statusBar2.showMessage('Analysis is done')
+        # start_time = time.time()
+        # end_time = time.time()
+        # diff = end_time - start_time
+        # # when a model is trained, the progress bar is updated
+        # # in order to do that we need to connect the progress bar to the model
+        # # list_of_keys = list(global_result[self.tab_number].keys())
+        # # self.progress.setValue(int(float(list_of_keys[-1].split('')[-1]) * 100))
+        # self.progress.setValue(0)
+        # self.progress.setValue(int(diff))
+        # self.progress.setValue(time)
+        # self.progress.setValue(int(float(global_result[self.tab_number].result.split()[2]) * 100))
+        # self.analyze_button.model.progress.connect(self.statusBar2.showMessage)
+
+        # self.progress.setGeometry(300, 300, 300, 300)
+        
         layoutResult = QVBoxLayout()
         # layoutResult.addWidget(videoWidgetResult)
-        # layoutResult.addLayout(vodbelow)
+        # layoutResult.addLayout(vojdbelow)
         layoutResult.addWidget(self.statusBar2)
+        layoutResult.addWidget(self.progress)
         # layoutResult.addWidget(showresultbtn)
         # layoutResult.addWidget(testbtn)
         layoutResult.addWidget(store_results_button)
