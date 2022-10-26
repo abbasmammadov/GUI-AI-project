@@ -21,7 +21,7 @@ class GlobalResultPerCamera():
     def __init__(self, camera_number):
         self.result_is_done = False
         self.result_is_loaded = False
-        self.analysis_started = False
+        # self.analysis_started = False
         self.result = None
         self.camera_number = camera_number
     
@@ -109,7 +109,7 @@ class Worker(QObject):
         # print(wgths)
         # print(datayml)
         # let's send weights, data, and sources to the server
-        host = '0.0.0.0'
+        host = '172.30.1.33' # enter your local server ip address here
         port = 999
         server = (host, port) # replace with server IP_addr
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -170,7 +170,7 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
         self.worker.moveToThread(self.thread)
         # Connect signals and slots
         self.thread.started.connect(self.worker.run_analyze)
-        global_result[self.tab_number].analysis_started = True
+        # global_result[self.tab_number].analysis_started = True
         # self.thread2.started.connect(self.progress)
         self.worker.finished.connect(self.thread.quit)
         self.worker.finished.connect(self.worker.deleteLater)
@@ -374,19 +374,19 @@ class VideoPlayer(QWidget):
         
         self.progress = ProgressBar()
         import time
-        # initialize start time
-        if global_result[self.tab_number].analyzed:
-            self.progress.setValue(100)
-            self.statusBar2.showMessage('Analysis is done')
-        start_time = time.time()
-        end_time = time.time()
-        diff = end_time - start_time
-        # when a model is trained, the progress bar is updated
-        # in order to do that we need to connect the progress bar to the model
-        # list_of_keys = list(global_result[self.tab_number].keys())
-        # self.progress.setValue(int(float(list_of_keys[-1].split('')[-1]) * 100))
-        self.progress.setValue(0)
-        self.progress.setValue(diff)
+        # # initialize start time
+        # if global_result[self.tab_number].analyzed:
+        #     self.progress.setValue(100)
+        #     self.statusBar2.showMessage('Analysis is done')
+        # start_time = time.time()
+        # end_time = time.time()
+        # diff = end_time - start_time
+        # # when a model is trained, the progress bar is updated
+        # # in order to do that we need to connect the progress bar to the model
+        # # list_of_keys = list(global_result[self.tab_number].keys())
+        # # self.progress.setValue(int(float(list_of_keys[-1].split('')[-1]) * 100))
+        # self.progress.setValue(0)
+        # self.progress.setValue(int(diff))
         # self.progress.setValue(time)
         # self.progress.setValue(int(float(global_result[self.tab_number].result.split()[2]) * 100))
         # self.analyze_button.model.progress.connect(self.statusBar2.showMessage)
