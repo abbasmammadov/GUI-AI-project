@@ -113,6 +113,13 @@ class Worker(QObject):
             # print(eval(result))
             print(type(eval(result)))
             global_result[curr_camera_number].result = eval(result)
+        
+        # write the paths of result video, raw video, and result json file in the project file
+        paths = {'Original Video': str(filenm), 'Result Video': save_dir + '/result.mp4', 'Result JSON': save_dir + '/result.json', 'checkpoints': str(wgths), 'data': str(datayml)}
+        print('project file:', paths)
+        # write a json project file in the same directory as result.json
+        with open(save_dir + '/project_file.kaip', 'w') as f:
+            json.dump(paths, f)
 
         json_output = {camera_num: camera_values.result for camera_num, camera_values in global_result.items()}
         # then write this result to global_result.json file
