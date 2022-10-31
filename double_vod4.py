@@ -1,4 +1,7 @@
+<<<<<<< HEAD
 
+=======
+>>>>>>> 46817aa7a66fac8bf08f0eb6e179944a2e833f2a
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
@@ -9,7 +12,11 @@ import socket
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 import json
 import os
+<<<<<<< HEAD
 import time
+=======
+# import time
+>>>>>>> 46817aa7a66fac8bf08f0eb6e179944a2e833f2a
 import argparse
 # from server import analyze_button
 # from ML_model.frames import *
@@ -111,9 +118,22 @@ class Worker(QObject):
         global_result[curr_camera_number].result_is_done = True
         with open(save_dir + '/result.json', 'r') as f:
             result = f.read()  # type: ignore
+<<<<<<< HEAD
             print(eval(result))
             print(type(eval(result)))
             global_result[curr_camera_number].result = eval(result)
+=======
+            # print(eval(result))
+            print(type(eval(result)))
+            global_result[curr_camera_number].result = eval(result)
+        
+        # write the paths of result video, raw video, and result json file in the project file
+        paths = {'Original Video': str(filenm), 'Result Video': save_dir + '/result.mp4', 'Result JSON': save_dir + '/result.json', 'checkpoints': str(wgths), 'data': str(datayml)}
+        print('project file:', paths)
+        # write a json project file in the same directory as result.json
+        with open(save_dir + '/project_file.kaip', 'w') as f:
+            json.dump(paths, f)
+>>>>>>> 46817aa7a66fac8bf08f0eb6e179944a2e833f2a
 
         json_output = {camera_num: camera_values.result for camera_num, camera_values in global_result.items()}
         # then write this result to global_result.json file
@@ -494,10 +514,16 @@ class VideoPlayer(QWidget):
     def open_video(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Upload the desired video",
                 ".", "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
+<<<<<<< HEAD
         global vid_name, income_video_size, mounted_drive
         mounted_drive = fileName[0]
         vid_name = fileName.split('/')[-1]
         income_video_size = os.path.getsize(fileName)
+=======
+        global vid_name#, income_video_size
+        vid_name = fileName.split('/')[-1]
+        # income_video_size = os.path.getsize(fileName)
+>>>>>>> 46817aa7a66fac8bf08f0eb6e179944a2e833f2a
         if fileName != '':
             self.mediaPlayer.setSource(QUrl.fromLocalFile(fileName))
             self.playButton.setEnabled(True)
@@ -520,8 +546,12 @@ class VideoPlayer(QWidget):
           #  print('so the total time is', self.total_time)
            # self.progress_bar.setRange(0, int(self.total_time))
     def load_result(self):
+<<<<<<< HEAD
         fileName = str(saved_dir_retrieve()) + '\\' + vid_name
         fileName = f'{mounted_drive}:/' + '/'.join(fileName.split('\\')[-5:])
+=======
+        fileName = str(saved_dir_retrieve() + '/' + vid_name)
+>>>>>>> 46817aa7a66fac8bf08f0eb6e179944a2e833f2a
         # fileName = str(saved_dir_retrieve())
         print('#######')
         print('result file name is ', fileName)
@@ -631,7 +661,11 @@ class MyTableWidget(QWidget):
         self.tabs = QTabWidget()
         self.tabs.setTabPosition(QTabWidget.TabPosition.North)
         self.add_tab_icon = QPushButton('Add Camera')
+<<<<<<< HEAD
         self.add_tab_icon.setStyleSheet("background-color: blue")
+=======
+        self.add_tab_icon.setStyleSheet("background-color: blue; color: white;")
+>>>>>>> 46817aa7a66fac8bf08f0eb6e179944a2e833f2a
         self.add_tab_icon.clicked.connect(self.add_tab)
         self.tabs.setCornerWidget(self.add_tab_icon, Qt.Corner.TopLeftCorner)
         self.tab1 = VideoPlayer(self.tab_number)
