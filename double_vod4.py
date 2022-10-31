@@ -110,11 +110,6 @@ class Worker(QObject):
         global_result[curr_camera_number].result_is_done = True
         with open(save_dir + '/result.json', 'r') as f:
             result = f.read()  # type: ignore
-<<<<<<< HEAD
-            print(eval(result))
-            print(type(eval(result)))
-            global_result[curr_camera_number].result = eval(result)
-=======
             # print(eval(result))
             print(type(eval(result)))
             global_result[curr_camera_number].result = eval(result)
@@ -125,7 +120,6 @@ class Worker(QObject):
         # write a json project file in the same directory as result.json
         with open(save_dir + '/project_file.kaip', 'w') as f:
             json.dump(paths, f)
->>>>>>> 46817aa7a66fac8bf08f0eb6e179944a2e833f2a
 
         json_output = {camera_num: camera_values.result for camera_num, camera_values in global_result.items()}
         # then write this result to global_result.json file
