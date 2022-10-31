@@ -1,9 +1,10 @@
+from ipaddress import ip_address
 from PyQt6.QtGui import QIcon, QFont
 from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
-from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow,
-        QPushButton,QProgressBar, QSizePolicy, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget)
+from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow, QLineEdit,
+        QPushButton,QProgressBar, QDialog, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget, QDialogButtonBox)
 import socket
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 import json
@@ -373,12 +374,13 @@ class VideoPlayer(QWidget):
         playresult_and_resultseekbar = QVBoxLayout()
         playresult_and_resultseekbar.addLayout(self.playresultbuttons)
         playresult_and_resultseekbar.addWidget(self.positionSliderResult)
-        upload_result = QPushButton('See the result video')
-        upload_result.setEnabled(True)
-        upload_result.setFixedHeight(25)
-        upload_result.setIconSize(btnSize)
+        map_vid_to_server = QPushButton('Map video to server')
+        map_vid_to_server.setEnabled(True)
+        map_vid_to_server.setFixedHeight(25)
+        map_vid_to_server.setIconSize(btnSize)
+        map_vid_to_server.clicked.connect(self.map_video_to_server)
         videoWidgetResultsupplements.addWidget(videoWidgetResult)
-        videoWidgetResultsupplements.addWidget(upload_result)
+        videoWidgetResultsupplements.addWidget(map_vid_to_server)
         videoWidgetResultsupplements.addLayout(playresult_and_resultseekbar)
         # videolayout.addWidget(videoWidget)
         videolayout.addLayout(videoWidgetsupplements)
@@ -455,7 +457,20 @@ class VideoPlayer(QWidget):
     # def real_time(self):
     #     global source
     #     source = 0 # set the source 0
-
+    
+    def map_video_to_server(self):
+        # create a separate window to allow users to provide the server's IP address, and server's port number
+        # create ip address and port number input boxes
+        dialog_box = CustomDialog()
+        dialog_box.exec()
+        # get the ip address and port number from the input boxes
+        user_name = dialog_box.get_user_name()
+        server_address = dialog_box.get_server_info()
+        drive_letter = dialog_box.get_drive_info()
+        port_number = dialog_box.get_port_number()
+        
+        server_ip = f'{user_name}@{server_address}:{port_number}'
+    
     def download_results(self):
         pass
     def forward10(self):
@@ -658,21 +673,82 @@ class App(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        # self.setWindowTitle("HELLO!")
+        # self.win = QMainWindow()
         self.title = 'PyQt6 - User interface to run object detection models'
-        self.left = 600
-        self.top = 300
-        self.width = 300
-        self.height = 600
+        # self.left = 300
+        # self.top = 300
+        # self.width = 300
+        # self.height = 400
+        # self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowTitle(self.title)
-        self.setGeometry(self.left, self.top, self.width, self.height)
+        self.dialogue = CustomDialog()
+        self.user_name = self.dialogue.get_user_name()
+        self.server_info = self.dialogue.get_server_info()
+        self.drive_info = self.dialogue.get_drive_info()
+        self.port_number = self.dialogue.get_port_number()
+        # map the drive, and pass infos to server
+        ip_info = f'{self.user_name}@{self.server_info}:{self.port_number}'
         
+        self.dialogue.buttonBox.accepted.connect(self.open_table_widget)
+        self.setCentralWidget(self.dialogue)
+        self.show()
+        
+    def open_table_widget(self):
         self.table_widget = MyTableWidget(self)
         self.setCentralWidget(self.table_widget)
-        
         self.show()
+class CustomDialog(QDialog, QMainWindow):
+    def __init__(self):
+        super().__init__()
+        
+        QBtn = QDialogButtonBox.StandardButton.Ok# | QDialogButtonBox.StandardButton.Cancel
 
+        self.buttonBox = QDialogButtonBox(QBtn)
+        # self.buttonBox.accepted.connect(self.accept)
+        # self.buttonBox.rejected.connect(self.reject)
+
+        self.layout = QVBoxLayout()
+        drive_message = QLabel("Please enter the drive letter of the USB drive")
+        self.drive_info = QLineEdit()
+        self.drive_info.setPlaceholderText("exapmle: E")
+        server_address_message = QLabel("Please enter the server address")
+        self.server_info = QLineEdit()
+        self.server_info.setPlaceholderText("Example: 125.28.**:**")
+        user_name_message = QLabel("Please enter your user name")
+        self.user_name = QLineEdit()
+        self.user_name.setPlaceholderText("Example: John")
+        port_message = QLabel("Please enter the port number")
+        self.port_number = QLineEdit()
+        self.port_number.setPlaceholderText("Example: 7024")
+        self.layout.addWidget(drive_message)
+        self.layout.addWidget(self.drive_info)
+        self.layout.addWidget(user_name_message)
+        self.layout.addWidget(self.user_name)
+        self.layout.addWidget(server_address_message)
+        self.layout.addWidget(self.server_info)
+        self.layout.addWidget(port_message)
+        self.layout.addWidget(self.port_number)
+        self.layout.addWidget(self.buttonBox)
+        
+        self.setLayout(self.layout)
+    
+    def get_user_name(self):
+        return self.user_name.text()
+    
+    def get_server_info(self):
+        return self.server_info.text()
+
+    def get_drive_info(self):
+        return self.drive_info.text()
+    
+    def get_port_number(self):
+        return self.port_number.text()
+    
+    
 if __name__ == '__main__':
     import sys
     app = QApplication(sys.argv)
+    
     ex = App()
     sys.exit(app.exec())
