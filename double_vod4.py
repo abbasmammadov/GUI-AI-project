@@ -467,6 +467,7 @@ class VideoPlayer(QWidget):
         """Long running task - analyzing"""        
         global wgths
         wgths = str(ROOT) + f'/checkpoints/yolov5_best.pt' # default selection -> yolov5
+        # wgths = str(ROOT) + f'/checkpoints/railway.pt'
         # print('Loading weights from ')
         # print(ROOT)
         # print(self.select_yolov5.isChecked())
@@ -493,7 +494,8 @@ class VideoPlayer(QWidget):
     def open_video(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Upload the desired video",
                 ".", "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
-        global vid_name, income_video_size
+        global vid_name, income_video_size, mounted_drive
+        mounted_drive = fileName[0]
         vid_name = fileName.split('/')[-1]
         income_video_size = os.path.getsize(fileName)
         if fileName != '':
@@ -518,7 +520,8 @@ class VideoPlayer(QWidget):
           #  print('so the total time is', self.total_time)
            # self.progress_bar.setRange(0, int(self.total_time))
     def load_result(self):
-        fileName = str(saved_dir_retrieve())# + '/' + vid_name
+        fileName = str(saved_dir_retrieve()) + '\\' + vid_name
+        fileName = f'{mounted_drive}:/' + '/'.join(fileName.split('\\')[-5:])
         # fileName = str(saved_dir_retrieve())
         print('#######')
         print('result file name is ', fileName)

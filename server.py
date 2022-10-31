@@ -53,7 +53,6 @@ def Main():
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     s.listen()
-    decode_format2 = 'utf-8'
     decode_format = 'utf-8'
     # server_foler = 
     # decode_format = 'ISO-8859-1'
@@ -64,25 +63,29 @@ def Main():
         print("new connection")
 
         # receiving folder name
-        folder_name = client.recv(1024).decode(decode_format)
-        print(folder_name)
+        # folder_name = client.recv(1024).decode(decode_format)
+        # print(folder_name)
         
         # creating folder path
-        server_folder_path = os.path.join('ML_model', 'data', folder_name)
+        # server_folder_path = os.path.join('ML_model', 'data', folder_name)
 
-        if not os.path.exists(server_folder_path):
-            os.makedirs(server_folder_path)
-            client.send(f'Folder {folder_name} is created'.encode(decode_format))
+        # if not os.path.exists(server_folder_path):
+        #     os.makedirs(server_folder_path)
+        #     client.send(f'Folder {folder_name} is created'.encode(decode_format))
         
-        else:
-            client.send(f'Folder {folder_name} already exists'.encode(decode_format))
-        # receive files from server 
-
+        # else:
+        #     client.send(f'Folder {folder_name} already exists'.encode(decode_format))
+        # # receive files from server 
+        # only the video is being transferred.
         while True:
             msg = client.recv(1024).decode(decode_format)
             print('this is message')
             print('type of the message', type(msg))
+            
             print(msg)
+            
+            print('yes are are connected:))')
+            break
             cmd, data = msg.split('::')
             # print(cmd, data)
             if cmd == 'FILENAME':
@@ -183,7 +186,7 @@ def Main():
                 f.close()
                 print(f'[CLIENT] {data}')
                 break
-        
+        client.close()
         transferred_files = [os.path.join(server_folder_path, file) for file in os.listdir(server_folder_path)]
         print('these are the files which are transferred okay :))')
         print(transferred_files)
