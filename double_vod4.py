@@ -542,7 +542,7 @@ class VideoPlayer(QWidget):
            # self.progress_bar.setRange(0, int(self.total_time))
     def load_result(self):
         fileName = str(saved_dir_retrieve()) + '\\' + vid_name
-        fileName = f'{mounted_drive}:/' + '/'.join(fileName.split('\\')[-5:])
+        # fileName = f'{mounted_drive}:/' + '/'.join(fileName.split('\\')[-5:])
         # fileName = str(saved_dir_retrieve())
         print('#######')
         print('result file name is ', fileName)
