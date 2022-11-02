@@ -461,15 +461,16 @@ class VideoPlayer(QWidget):
     def map_video_to_server(self):
         # create a separate window to allow users to provide the server's IP address, and server's port number
         # create ip address and port number input boxes
-        dialog_box = CustomDialog()
-        dialog_box.exec()
-        # get the ip address and port number from the input boxes
-        user_name = dialog_box.get_user_name()
-        server_address = dialog_box.get_server_info()
-        drive_letter = dialog_box.get_drive_info()
-        port_number = dialog_box.get_port_number()
+        # dialog_box = CustomDialog()
+        # dialog_box.exec()
+        # # get the ip address and port number from the input boxes
+        # user_name = dialog_box.get_user_name()
+        # server_address = dialog_box.get_server_info()
+        # drive_letter = dialog_box.get_drive_info()
+        # port_number = dialog_box.get_port_number()
         
-        server_ip = f'{user_name}@{server_address}:{port_number}'
+        # server_ip = f'{user_name}@{server_address}:{port_number}'
+        pass
     
     def download_results(self):
         pass
@@ -515,6 +516,7 @@ class VideoPlayer(QWidget):
     def open_video(self):
         fileName, _ = QFileDialog.getOpenFileName(self, "Upload the desired video",
                 ".", "Video Files (*.mp4 *.flv *.ts *.mts *.avi)")
+        print(fileName)
         global vid_name, income_video_size, mounted_drive
         mounted_drive = fileName[0]
         vid_name = fileName.split('/')[-1]
@@ -687,8 +689,13 @@ class App(QMainWindow):
         self.server_info = self.dialogue.get_server_info()
         self.drive_info = self.dialogue.get_drive_info()
         self.port_number = self.dialogue.get_port_number()
+        self.common_network = self.dialogue.get_common_network_info()
         # map the drive, and pass infos to server
-        ip_info = f'{self.user_name}@{self.server_info}:{self.port_number}'
+        global ip_info, port_info, drive_info, common_network_info
+        ip_info = f'{self.user_name}@{self.server_info}'
+        port_info = self.port_number
+        drive_info = self.drive_info
+        common_network_info = self.common_network
         
         self.dialogue.buttonBox.accepted.connect(self.open_table_widget)
         self.setCentralWidget(self.dialogue)
@@ -714,13 +721,16 @@ class CustomDialog(QDialog, QMainWindow):
         self.drive_info.setPlaceholderText("exapmle: E")
         server_address_message = QLabel("Please enter the server address")
         self.server_info = QLineEdit()
-        self.server_info.setPlaceholderText("Example: 125.28.**:**")
+        self.server_info.setPlaceholderText("Example: 125.138.99:152")
         user_name_message = QLabel("Please enter your user name")
         self.user_name = QLineEdit()
-        self.user_name.setPlaceholderText("Example: John")
+        self.user_name.setPlaceholderText("Example: kaleb")
         port_message = QLabel("Please enter the port number")
         self.port_number = QLineEdit()
         self.port_number.setPlaceholderText("Example: 7024")
+        common_network_message = QLabel("Please enter the common network address")
+        self.common_network_info = QLineEdit()
+        self.common_network_info.setPlaceholderText("Example:192.168.55.11")
         self.layout.addWidget(drive_message)
         self.layout.addWidget(self.drive_info)
         self.layout.addWidget(user_name_message)
@@ -729,6 +739,8 @@ class CustomDialog(QDialog, QMainWindow):
         self.layout.addWidget(self.server_info)
         self.layout.addWidget(port_message)
         self.layout.addWidget(self.port_number)
+        self.layout.addWidget(common_network_message)
+        self.layout.addWidget(self.common_network_info)
         self.layout.addWidget(self.buttonBox)
         
         self.setLayout(self.layout)
@@ -744,6 +756,8 @@ class CustomDialog(QDialog, QMainWindow):
     
     def get_port_number(self):
         return self.port_number.text()
+    def get_common_network_info(self):
+        return self.common_network_info.text()
     
     
 if __name__ == '__main__':
