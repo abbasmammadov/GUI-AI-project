@@ -1,4 +1,4 @@
-## Instructions to execute code for mounting USB drive to a remote server
+## Instructions for making inference on a server, whose data is on a removable USB drive
 
 this text assumes your drive uses the letter z to map the removable disk
 
