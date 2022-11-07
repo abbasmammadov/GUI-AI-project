@@ -1,8 +1,0 @@
-path: /home/abbasmammadov/yolov5/electric-data
-
-train: train
-val: val
-test: test
-
-nc: 4
-names: ["suspension_Insulator", "protector", "catenary", "hanger"]
