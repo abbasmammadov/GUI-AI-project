@@ -1,19 +1,14 @@
 from ipaddress import ip_address
 from PyQt6.QtGui import QIcon, QFont
-from PyQt6.QtCore import QDir, Qt, QUrl, QSize, QObject, pyqtSignal, QThread
+from PyQt6.QtCore import Qt, QUrl, QSize, QObject, pyqtSignal, QThread
 from PyQt6.QtMultimedia import QMediaPlayer
 from PyQt6.QtMultimediaWidgets import QVideoWidget
 from PyQt6.QtWidgets import (QApplication, QFileDialog, QHBoxLayout, QLabel, QMainWindow, QLineEdit,
         QPushButton,QProgressBar, QDialog, QSlider, QStyle, QVBoxLayout, QWidget, QStatusBar, QTabWidget, QDialogButtonBox)
-import socket
 from ML_model.detect import run, ROOT # ROOT is ML_model in our case
 import json
-import os
-import time
 import argparse
-# from server import analyze_button
-# from ML_model.frames import *
-#changed by Kaleb
+
 filename = ''
 buffer_size = 1024
 vid_name = ''
@@ -123,14 +118,6 @@ class Worker(QObject):
         # then write this result to global_result.json file
         with open('global_result.json', 'w') as f:
             json.dump(json_output, f)
-        
-        # statusBar = QStatusBar()
-        # statusBar.setFont(QFont("Noto Sans", 10))
-        # statusBar.setFixedHeight(14)
-        # statusBar.showMessage('Analysis done. Click on the play button to view the result')
-
-        
-
 
 class VideoAnalyzerButton(QPushButton, QMainWindow):
     def __init__(self, tab_number, parent=None):#progress_bar_object, parent=None):
@@ -178,9 +165,7 @@ class VideoPlayer(QWidget):
         self.curr_camera_number = f'Camera-{self.tab_number}'
 
         global_result[self.curr_camera_number] = GlobalResultPerCamera(self.curr_camera_number)
-        # global result_is_done, result_is_loaded
-        # result_is_done = False
-        # result_is_loaded = False
+        
         
         self.mediaPlayer = QMediaPlayer()
         self.mediaPlayerResult = QMediaPlayer()
@@ -188,15 +173,6 @@ class VideoPlayer(QWidget):
         videoWidget = QVideoWidget()
         # start
         videoWidgetResult = QVideoWidget()
-        # videoWidget.setFixedHeight(250)
-        # videoWidgetResult.setFixedHeight(250)
-        # testbtn = QPushButton("Display status as text") # change it to -> show results as text
-        # testbtn.clicked.connect(self.test)
-
-        # showresultbtn = QPushButton("Show Result")
-        # showresultbtn.clicked.connect(self.showresult)
-
-        # to add button vertically create a QPush button instance here
 
         self.playButtonResult = QPushButton('Result Video')
         self.playButtonResult.setEnabled(True)
@@ -212,15 +188,7 @@ class VideoPlayer(QWidget):
         self.positionSlider = QSlider(Qt.Orientation.Horizontal)
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(self.setPosition)
-        # vodbelow = QHBoxLayout()
-        # vodbelow.setContentsMargins(0, 0, 0, 0)
-        # vodbelow.addWidget(self.playButtonResult)
-        # vodbelow.addWidget(self.positionSliderResult)
-        
-        # another status bar for showing the file name of the analyzed video
-
-        # add camera button on the top right corner
-        
+      
         self.openButton = QPushButton("Upload Video")   
         self.openButton.setToolTip("Open Video File")
         self.openButton.setStatusTip("Open Video File")
@@ -336,21 +304,6 @@ class VideoPlayer(QWidget):
         self.statusBar.setFixedHeight(14)
         self.statusBar.showMessage('Ready')
 
-        # camerabutton = QPushButton('Camera')
-        # camerabutton.setPosition(0, 0)
-        # camerabutton.setCheckable(True)
-        # camerabutton.setEnabled(True)
-        # camerabutton.setFixedHeight(30)
-        # camerabutton.setIconSize(btnSize)
-        # camerabutton.setIcon(QIcon('camera.png'))
-        # camerabutton.clicked.connect(self.real_time)
-
-        # controlLayout = QHBoxLayout()
-        # controlLayout.setContentsMargins(0, 0, 0, 0)
-        # layoutUpload.addWidget(self.openButton)
-        # layoutUpload.addWidget(self.playButton)
-        # layoutUpload.addWidget(self.positionSlider)
-
         store_results_button = QPushButton('Download results')
         store_results_button.setEnabled(True)
         store_results_button.setFixedHeight(25)
@@ -379,49 +332,25 @@ class VideoPlayer(QWidget):
         videoWidgetResultsupplements.addWidget(videoWidgetResult)
         videoWidgetResultsupplements.addWidget(map_vid_to_server)
         videoWidgetResultsupplements.addLayout(playresult_and_resultseekbar)
-        # videolayout.addWidget(videoWidget)
         videolayout.addLayout(videoWidgetsupplements)
-        # videolayout.addWidget(videoWidgetResult)
         videolayout.addLayout(videoWidgetResultsupplements)
         layoutUpload = QVBoxLayout()
-        # layoutUpload.addWidget(camerabutton)
-        # layoutUpload.addWidget(videoWidget)
         layoutUpload.addLayout(videolayout)
-        # uploads_and_results = QHBoxLayout()
-        # uploads_and_results.addLayout(open_and_playbuttons)
-        # uploads_and_results.addLayout(playresult_and_resultseekbar)
-        # layoutUpload.addWidget(self.openButton)
-        # layoutUpload.addWidget(self.playButton)
-        # layoutUpload.addLayout(self.playbuttons)
-        # layoutUpload.addWidget(self.positionSlider)
-        # layoutUpload.addLayout(uploads_and_results)
+   
 
         leftbuttons = QVBoxLayout()
-        # controls = QVBoxLayout()
         analyze_and_get_results = QHBoxLayout()
-        # analyze_and_get_results.addWidget(self.analyze_button)
-        # layoutUpload.addLayout(controlLayout)
         leftbuttons.addWidget(self.statusBar)
         leftbuttons.addLayout(models)
         leftbuttons.addWidget(self.analyze_button)
-        # leftbuttons.addWidget(store_results_button)
-        # controls.addLayout(analyze_and_get_results)
-        # controls.addWidget(store_results_button)
         self.statusBar2 = QStatusBar()
         self.statusBar2.setFont(QFont("Noto Sans", 10))
         self.statusBar2.setFixedHeight(60)
-        self.statusBar2.showMessage('Result\n')
-
+        self.statusBar2.showMessage('Result')
         
-
         layoutResult = QVBoxLayout()
-        # layoutResult.addWidget(videoWidgetResult)
-        # layoutResult.addLayout(vodbelow)
-
         layoutResult.addWidget(self.statusBar2)
         layoutResult.addWidget(self.progress_bar)
-        # layoutResult.addWidget(showresultbtn)
-        # layoutResult.addWidget(testbtn)
         layoutResult.addWidget(store_results_button)
         analyze_and_get_results.addLayout(leftbuttons)
         analyze_and_get_results.addLayout(layoutResult)
@@ -430,11 +359,6 @@ class VideoPlayer(QWidget):
         entire_layout.addLayout(layoutUpload)
         entire_layout.addLayout(analyze_and_get_results)
 
-        # layout = QHBoxLayout()
-        # layout.addLayout(layoutUpload)
-        # # layout.addLayout(layoutResult)
-
-        # self.setLayout(layoutUpload)
         self.setLayout(entire_layout)
 
         self.mediaPlayer.setVideoOutput(videoWidget)
@@ -451,26 +375,6 @@ class VideoPlayer(QWidget):
         self.mediaPlayerResult.durationChanged.connect(self.durationChangedResult)
         self.mediaPlayerResult.errorOccurred.connect(self.handleError)
 
-    # def real_time(self):
-    #     global source
-    #     source = 0 # set the source 0
-    
-    def map_video_to_server(self):
-        # create a separate window to allow users to provide the server's IP address, and server's port number
-        # create ip address and port number input boxes
-        # dialog_box = CustomDialog()
-        # dialog_box.exec()
-        # # get the ip address and port number from the input boxes
-        # user_name = dialog_box.get_user_name()
-        # server_address = dialog_box.get_server_info()
-        # drive_letter = dialog_box.get_drive_info()
-        # port_number = dialog_box.get_port_number()
-        
-        # server_ip = f'{user_name}@{server_address}:{port_number}'
-        pass
-    
-    def download_results(self):
-        pass
     def forward10(self):
         self.mediaPlayer.setPosition(self.mediaPlayer.position() + 1000 * frame_skip_second) # 1 second forward
     
@@ -482,16 +386,11 @@ class VideoPlayer(QWidget):
 
     def back10_result(self):
         self.mediaPlayerResult.setPosition(self.mediaPlayer.position() - 1000 * frame_skip_second) # 1 second backward
+        
     def select_model(self):
-        """Long running task - analyzing"""        
+            
         global wgths
         wgths = str(ROOT) + f'/checkpoints/yolov5_best.pt' # default selection -> yolov5
-        # wgths = str(ROOT) + f'/checkpoints/railway.pt'
-        # print('Loading weights from ')
-        # print(ROOT)
-        # print(self.select_yolov5.isChecked())
-        # if self.select_yolov5.isChecked():
-            # self.select_yolov5.setEnabled(False)
         if self.select_yolov7.isChecked():
             wgths = str(ROOT) + f'/checkpoints/yolov7s6.pt'
             # self.select_yolov7.setEnabled(False)
@@ -502,11 +401,7 @@ class VideoPlayer(QWidget):
             wgths = str(ROOT) + f'/checkpoints/dinos6.pt'
             # self.select_dino.setEnabled(False)
         print('selected weight:', wgths.split('/')[-1])
-        
- #       import time
-  #      start_time = time.time()
-   #     print('time is ', start_time)
-    #    self.progress_bar.setValue(int(start_time + 0.013 * 1e6))
+
         self.analyze_button.setEnabled(True)
         return wgths
 
@@ -528,22 +423,8 @@ class VideoPlayer(QWidget):
             filename = fileName
             self.openButton.setEnabled(False)
 
-            print('working on the status-bar')
-
-           # self.total_time = 10 * 1e6
-            #if vid_name == 'no_crack_4_raw.mp4':
-             #   self.total_time = 10 * 1e6
-     #       elif vid_name == 'no_crack_5_raw.mp4':
-      #          self.total_time = 12 * 1e6
-       #     else:
-        #        self.total_time = 12 * 1e6
-         #   print('the name of the video is', vid_name)
-          #  print('so the total time is', self.total_time)
-           # self.progress_bar.setRange(0, int(self.total_time))
     def load_result(self):
         fileName = str(saved_dir_retrieve()) + '\\' + vid_name
-        # fileName = f'{mounted_drive}:/' + '/'.join(fileName.split('\\')[-5:])
-        # fileName = str(saved_dir_retrieve())
         print('#######')
         print('result file name is ', fileName)
         print('#######')
@@ -558,25 +439,6 @@ class VideoPlayer(QWidget):
         print("Name of file")
         print(self.statusBar.currentMessage())
         return self.statusBar.currentMessage()
-
-    # def play(self):
-    #     # print('result is done:', result_is_done)
-    #     # if not result_is_done:
-    #     #     print('Analysis is running. Please wait for a moment')
-        
-    #     if global_result[self.curr_camera_number].result_is_done and not global_result[self.curr_camera_number].result_is_loaded:
-    #         self.load_result()
-    #         # self.progress_bar.setValue(66)
-    #         global_result[self.curr_camera_number].result_is_loaded = True
-            
-    #     if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
-    #         if global_result[self.curr_camera_number].result_is_done:
-    #             self.mediaPlayerResult.pause()
-    #         self.mediaPlayer.pause()
-    #     else:
-    #         if global_result[self.curr_camera_number].result_is_done:
-    #             self.mediaPlayerResult.play()
-    #         self.mediaPlayer.play()
 
     def play(self):
         if self.mediaPlayer.playbackState() == QMediaPlayer.PlaybackState.PlayingState:
@@ -631,8 +493,6 @@ class VideoPlayer(QWidget):
         self.positionSliderResult.setRange(0, duration)
 
     def setPosition(self, position):
-        # if global_result[self.curr_camera_number].result_is_done:
-        #     self.setPositionResult(position)
         self.mediaPlayer.setPosition(position)
 
     def setPositionResult(self, position):
@@ -660,8 +520,6 @@ class MyTableWidget(QWidget):
         self.tabs.resize(300,200)
         self.layout.addWidget(self.tabs)
         self.setLayout(self.layout)
-    
-        # how can we allow users to add more tabs
         
     def add_tab(self):
         self.tab_number += 1
@@ -676,11 +534,11 @@ class App(QMainWindow):
         # self.setWindowTitle("HELLO!")
         # self.win = QMainWindow()
         self.title = 'PyQt6 - User interface to run object detection models'
-        # self.left = 300
-        # self.top = 300
-        # self.width = 300
-        # self.height = 400
-        # self.setGeometry(self.left, self.top, self.width, self.height)
+        self.left = 300
+        self.top = 300
+        self.width = 300
+        self.height = 400
+        self.setGeometry(self.left, self.top, self.width, self.height)
         self.setWindowTitle(self.title)
         self.dialogue = CustomDialog()
         self.user_name = self.dialogue.get_user_name()
@@ -693,13 +551,6 @@ class App(QMainWindow):
         port_info = self.port_number
         ip_info = f'{self.user_name}@{self.server_info}:{port_info}'
         drive_info = self.drive_info
-        # common_network_info = self.common_network
-        # execute the script here -> 
-        #       remove any precreated nw drive, 
-        #       get the new drive info, -> 
-        #       now this drive will be designated as a shared folder
-        #       create a network drive path to this shared folder
-        
         self.dialogue.buttonBox.accepted.connect(self.open_table_widget)
         self.setCentralWidget(self.dialogue)
         self.show()
@@ -742,8 +593,6 @@ class CustomDialog(QDialog, QMainWindow):
         self.layout.addWidget(self.server_info)
         self.layout.addWidget(port_message)
         self.layout.addWidget(self.port_number)
-        # self.layout.addWidget(common_network_message)
-        # self.layout.addWidget(self.common_network_info)
         self.layout.addWidget(self.buttonBox)
         
         self.setLayout(self.layout)
