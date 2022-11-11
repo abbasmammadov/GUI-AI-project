@@ -128,7 +128,7 @@ class VideoAnalyzerButton(QPushButton, QMainWindow):
         self.setFixedHeight(24)
         self.setIconSize(QSize(16, 16))
         self.setFont(QFont("Noto Sans", 8))
-        self.setIcon(QIcon("analyze.png"))
+        self.setIcon(QIcon("img/analyze.png"))
         self.clicked.connect(self.analyze)
         self.tab_number = tab_number
         # self.progress_bar_object = progress_bar_object
@@ -195,7 +195,7 @@ class VideoPlayer(QWidget):
         self.openButton.setFixedHeight(25)
         self.openButton.setIconSize(btnSize)
         # self.openButton.setFont(QFont("Noto Sans", 8))
-        self.openButton.setIcon(QIcon.fromTheme("document-open", QIcon("upload-icon.png")))
+        self.openButton.setIcon(QIcon.fromTheme("document-open", QIcon("img/upload-icon.png")))
         self.openButton.clicked.connect(self.open_video)
 
         self.select_yolov5 = QPushButton('YOLOv5')
